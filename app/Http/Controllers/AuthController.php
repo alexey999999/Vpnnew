@@ -1,14 +1,16 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class AuthController extends Controller
 {
-    public function showLoginForm(Request $request)
+    public function showLoginForm(Request $request): Response
     {
         return Inertia::render('auth/Login', [
             'status' => $request->session()->get('status'),
@@ -21,8 +23,10 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+        
+        $user = User::where('email', $credentials['email'])->first();
 
-        if (Auth::attempt($credentials, $request->has('remember')) && Auth::user()->isAdmin()) {
+        if ($user && $user->is_admin && Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
 
             return redirect()->route('dashboard');
