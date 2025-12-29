@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
     SidebarGroup,
-    SidebarGroupLabel,
+    // SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -19,7 +19,7 @@ const page = usePage();
 
 <template>
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel>Cервера</SidebarGroupLabel>
+<!--        <SidebarGroupLabel>Cервера</SidebarGroupLabel>-->
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton
