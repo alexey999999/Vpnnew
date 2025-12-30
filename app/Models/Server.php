@@ -28,9 +28,20 @@ class Server extends Model
         'password',
         'encryption_method',
     ];
+    
+    protected const DATE_TIME_FORMAT = 'H:i:s d.m.Y';
 
-    public function type() {
-        return $this->hasOne(ServerType::class, 'id', 'server_type_id');
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime:' . self::DATE_TIME_FORMAT,
+            'updated_at' => 'datetime:' . self::DATE_TIME_FORMAT,
+        ];
     }
 
     public function country() {

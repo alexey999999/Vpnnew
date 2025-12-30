@@ -37,4 +37,34 @@ export interface User {
     updated_at: string;
 }
 
+export interface Server {
+    id: number;
+    name: string;
+    server_type: ServerType;
+    protocol_version: number;
+    ipv4: string;
+    country: Country;
+    url: string;
+    main_token: string;
+    remote_token: string;
+    current_load: number;
+    avg_load: number;
+    port?: string;
+    password?: string;
+    encryption_method?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface ServerType {
+    id: number;
+    name: string;
+}
+
+export interface Country {
+    id: number;
+    code: string;
+    name: string;
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;

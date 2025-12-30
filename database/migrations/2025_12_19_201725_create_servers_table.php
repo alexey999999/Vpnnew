@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->unsignedBigInteger('server_type_id');
-            $table->unsignedSmallInteger('protocol_version');
+            $table->float('protocol_version');
 //            ipv4 varbinary(16)
             $table->unsignedBigInteger('country_id');
             $table->string('url', 255);
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE `servers` ADD `ipv4` VARBINARY(16) NOT NULL AFTER `server_type_id`');
+        DB::statement('ALTER TABLE `servers` ADD `ipv4` VARBINARY(16) NOT NULL AFTER `protocol_version`');
     }
 
     /**

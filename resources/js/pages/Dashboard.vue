@@ -22,24 +22,34 @@ const breadcrumbs: BreadcrumbItem[] = [
         >
             <div class="grid auto-rows-min gap-4 md:grid-cols-3">
                 <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border flex items-center justify-center"
                 >
+                    <div>Блок статистики 1</div>
                     <PlaceholderPattern />
                 </div>
                 <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border flex items-center justify-center"
                 >
+                    <div>Блок статистики 2</div>
                     <PlaceholderPattern />
                 </div>
                 <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border flex items-center justify-center"
                 >
+                    <div>Блок статистики 3</div>
                     <PlaceholderPattern />
                 </div>
             </div>
             <div
-                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex items-center justify-center"
             >
+                <div>Блок статистики 4</div>
+                <PlaceholderPattern />
+            </div>
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border flex items-center justify-center"
+            >
+                <div>Подвал</div>
                 <PlaceholderPattern />
             </div>
         </div>

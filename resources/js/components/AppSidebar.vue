@@ -14,8 +14,9 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Server } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import { index as serversIndex } from '@/routes/servers';
 
 const mainNavItems: NavItem[] = [
     {
@@ -23,20 +24,25 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Серверы',
+        href: serversIndex(),
+        icon: Server,
+    },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+// const footerNavItems: NavItem[] = [
+//     {
+//         title: 'Github Repo',
+//         href: 'https://github.com/laravel/vue-starter-kit',
+//         icon: Folder,
+//     },
+//     {
+//         title: 'Documentation',
+//         href: 'https://laravel.com/docs/starter-kits#vue',
+//         icon: BookOpen,
+//     },
+// ];
 </script>
 
 <template>

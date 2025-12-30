@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CountrySeeder::class,
             ServerTypeSeeder::class,
+            ServerSeeder::class,
             ConfigurationTypeSeeder::class,
         ]);
     }
