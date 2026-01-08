@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Server extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -15,11 +16,12 @@ class Server extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'name',
         'server_type_id',
+        'protocol_version',
         'ipv4',
         'country_id',
         'url',
-        'name',
         'main_token',
         'remote_token',
         'current_load',

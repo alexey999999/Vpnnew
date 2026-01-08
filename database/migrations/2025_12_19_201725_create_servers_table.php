@@ -31,6 +31,7 @@ return new class extends Migration
             $table->foreign('server_type_id')->references('id')->on('server_types');
             $table->foreign('country_id')->references('id')->on('countries');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         DB::statement('ALTER TABLE `servers` ADD `ipv4` VARBINARY(16) NOT NULL AFTER `protocol_version`');

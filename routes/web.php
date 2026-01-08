@@ -18,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('servers', [ServersController::class, 'index'])->name('servers.index');
+    Route::post('servers', [ServersController::class, 'store'])->name('servers.store');
 });
 
 require __DIR__.'/settings.php';

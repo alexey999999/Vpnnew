@@ -1,9 +1,38 @@
 <script setup lang="ts">
 
-import { Head } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem, Server } from '@/types';
+import { BreadcrumbItem, CountryForSelect, Server, ServerTypeForSelect } from '@/types';
 import { index as serversIndex } from '@/routes/servers';
+import { computed, ref, watch } from 'vue';
+import Modal from '@/components/Modal.vue';
+import FormItemInput from '@/components/FormItemInput.vue';
+import FormItemSelect from '@/components/FormItemSelect.vue';
+
+const showAddServerModal = ref(false);
+
+watch(showAddServerModal, (isOpen) => {
+    // need for disable scroll main content in html body
+    if (isOpen) {
+        document.documentElement.classList.add('overflow-y-hidden');
+    } else {
+        document.documentElement.classList.remove('overflow-y-hidden');
+    }
+});
+
+const form = useForm({
+    name: '',
+    server_type_id: '',
+    protocol_version: '',
+    ipv4: '',
+    country_id: '',
+    url: '',
+    main_token: '',
+    remote_token: '',
+    port: '',
+    password: '',
+    encryption_method: '',
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,7 +64,56 @@ const serversTableTdClasses: string = "border border-gray-300 p-4";
 
 defineProps<{
     servers: Server[];
+    serversTypes: ServerTypeForSelect[];
+    countries: CountryForSelect[];
 }>();
+
+const page = usePage()
+
+const isServerTypeSS: string = computed(() => {
+    return page.props.serversTypes.find((serverType) => {
+        return serverType.value === form.server_type_id && serverType.label == 'ss'
+    })
+});
+
+watch(isServerTypeSS, (isSS) => {
+    if (!isSS) {
+        form.port = ''
+        form.password = ''
+        form.encryption_method = ''
+    }
+});
+
+const saveServerForm = () => {
+    // Here you can process the data, e.g., send it to an API,
+    // save to local storage, or perform validation
+
+    form.post(page.props.createServerUrl, {
+        onSuccess: () => {
+            showAddServerModal.value = false
+            form.reset()
+        }, 
+    });
+
+    // Example: Send data to a backend server using fetch or axios
+    /*
+    fetch('/api/submit-endpoint', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData.value),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      alert('Form saved successfully!');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+    */
+};
 </script>
 
 <template>
@@ -44,6 +122,32 @@ defineProps<{
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
+            <Modal :show="showAddServerModal" @close="showAddServerModal = false">
+                <h3 class="text-2xl font-bold mb-4">Добавление сервера</h3>
+                <FormItemInput v-model="form.name" :label="'Название'"></FormItemInput>
+                <FormItemSelect v-model="form.server_type_id" :label="'Тип'" :options="serversTypes"></FormItemSelect>
+                <FormItemInput v-model="form.protocol_version" :label="'Версия протокола'"></FormItemInput>
+                <FormItemInput v-model="form.ipv4" :label="'ipv4'"></FormItemInput>
+                <FormItemSelect v-model="form.country_id" :label="'Страна'" :options="countries"></FormItemSelect>
+                <FormItemInput v-model="form.url" :label="'Url'"></FormItemInput>
+                <FormItemInput v-model="form.main_token" :label="'Главный токен'"></FormItemInput>
+                <FormItemInput v-model="form.remote_token" :label="'Токен сервера'"></FormItemInput>
+                <FormItemInput v-if="isServerTypeSS" v-model="form.port" :label="'Порт'"></FormItemInput>
+                <FormItemInput v-if="isServerTypeSS" v-model="form.password" :label="'Пароль'"></FormItemInput>
+                <FormItemInput v-if="isServerTypeSS" v-model="form.encryption_method" :label="'Метод шифрования'"></FormItemInput>
+                <button @click="saveServerForm" :disabled="form.processing"
+                        class="block rounded-md bg-emerald-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500 focus:outline-none cursor-pointer"
+                >
+                    Сохранить
+                </button>
+            </Modal>
+            <div>
+                <button @click="showAddServerModal = true"
+                        class="block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer"
+                >
+                    Добавить сервер
+                </button>
+            </div>
             <table class="border-collapse border border-gray-400">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>

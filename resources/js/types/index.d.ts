@@ -61,10 +61,19 @@ export interface ServerType {
     name: string;
 }
 
+export interface ServerTypeForSelect extends Option {}
+
 export interface Country {
     id: number;
     code: string;
     name: string;
+}
+
+export interface CountryForSelect extends Option {}
+
+export interface Option {
+    value: number;
+    label: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
