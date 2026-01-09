@@ -1,11 +1,11 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Servers\CreateServerRequest;
 use App\Models\Country;
 use App\Models\Server;
 use App\Models\ServerType;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,7 +22,7 @@ class ServersController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(CreateServerRequest $request): RedirectResponse
     {
         Server::create($request->all());
 

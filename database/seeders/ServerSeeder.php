@@ -29,7 +29,7 @@ class ServerSeeder extends Seeder
             'SHA-512',
             'SHA-3',
         ];
-        $numRows = 100;
+        $numRows = config('app.servers.seeder_num_rows');
         $data = [];
         
         for ($i = 0; $i < $numRows; $i++) {

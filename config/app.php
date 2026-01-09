@@ -123,4 +123,11 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    | Other app configs
+    */
+
+    'servers' => [
+        'seeder_num_rows' => env('SERVERS_SEEDER_NUM_ROWS', 10),
+    ],
 ];

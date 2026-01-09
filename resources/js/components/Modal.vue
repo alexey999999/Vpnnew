@@ -13,7 +13,6 @@ const close = () => emit('close');
 <template>
     <teleport to="body">
         <div v-if="show" class="modal-overlay" @click.self="close">
-            //todo: max-height to 100vh-40px, default - max content
             <div class="modal-content-wrapper h-[calc(100vh-40px)]">
                 <div class="modal-content w-xl h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <component :is="X" @click="close"

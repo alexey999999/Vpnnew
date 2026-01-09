@@ -124,17 +124,17 @@ const saveServerForm = () => {
         >
             <Modal :show="showAddServerModal" @close="showAddServerModal = false">
                 <h3 class="text-2xl font-bold mb-4">Добавление сервера</h3>
-                <FormItemInput v-model="form.name" :label="'Название'"></FormItemInput>
-                <FormItemSelect v-model="form.server_type_id" :label="'Тип'" :options="serversTypes"></FormItemSelect>
-                <FormItemInput v-model="form.protocol_version" :label="'Версия протокола'"></FormItemInput>
-                <FormItemInput v-model="form.ipv4" :label="'ipv4'"></FormItemInput>
-                <FormItemSelect v-model="form.country_id" :label="'Страна'" :options="countries"></FormItemSelect>
-                <FormItemInput v-model="form.url" :label="'Url'"></FormItemInput>
-                <FormItemInput v-model="form.main_token" :label="'Главный токен'"></FormItemInput>
-                <FormItemInput v-model="form.remote_token" :label="'Токен сервера'"></FormItemInput>
-                <FormItemInput v-if="isServerTypeSS" v-model="form.port" :label="'Порт'"></FormItemInput>
-                <FormItemInput v-if="isServerTypeSS" v-model="form.password" :label="'Пароль'"></FormItemInput>
-                <FormItemInput v-if="isServerTypeSS" v-model="form.encryption_method" :label="'Метод шифрования'"></FormItemInput>
+                <FormItemInput v-model="form.name" :label="'Название'" :error="page.props.errors.name"></FormItemInput>
+                <FormItemSelect v-model="form.server_type_id" :label="'Тип'" :options="serversTypes" :error="page.props.errors.server_type_id"></FormItemSelect>
+                <FormItemInput v-model="form.protocol_version" :label="'Версия протокола'" :error="page.props.errors.protocol_version"></FormItemInput>
+                <FormItemInput v-model="form.ipv4" :label="'ipv4'" :error="page.props.errors.ipv4"></FormItemInput>
+                <FormItemSelect v-model="form.country_id" :label="'Страна'" :options="countries" :error="page.props.errors.country_id"></FormItemSelect>
+                <FormItemInput v-model="form.url" :label="'Url'" :error="page.props.errors.url"></FormItemInput>
+                <FormItemInput v-model="form.main_token" :label="'Главный токен'" :error="page.props.errors.main_token"></FormItemInput>
+                <FormItemInput v-model="form.remote_token" :label="'Токен сервера'" :error="page.props.errors.remote_token"></FormItemInput>
+                <FormItemInput v-if="isServerTypeSS" v-model="form.port" :label="'Порт'" :error="page.props.errors.port"></FormItemInput>
+                <FormItemInput v-if="isServerTypeSS" v-model="form.password" :label="'Пароль'" :error="page.props.errors.password"></FormItemInput>
+                <FormItemInput v-if="isServerTypeSS" v-model="form.encryption_method" :label="'Метод шифрования'" :error="page.props.errors.encryption_method"></FormItemInput>
                 <button @click="saveServerForm" :disabled="form.processing"
                         class="block rounded-md bg-emerald-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500 focus:outline-none cursor-pointer"
                 >
