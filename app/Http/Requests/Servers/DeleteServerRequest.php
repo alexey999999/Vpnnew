@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Http\Requests\Servers;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteServerRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'id' => ['required', 'int', 'exists:servers,id'],
+        ];
+    }
+}

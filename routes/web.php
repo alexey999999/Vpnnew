@@ -19,6 +19,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('servers', [ServersController::class, 'index'])->name('servers.index');
     Route::post('servers', [ServersController::class, 'store'])->name('servers.store');
+    Route::put('servers', [ServersController::class, 'update'])->name('servers.update');
+    Route::delete('servers', [ServersController::class, 'delete'])->name('servers.delete');
 });
 
 require __DIR__.'/settings.php';

@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\Servers;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class CreateServerRequest extends FormRequest
+class UpdateServerRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

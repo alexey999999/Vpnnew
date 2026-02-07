@@ -1,7 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Servers\CreateServerRequest;
+use App\Http\Requests\Servers\DeleteServerRequest;
+use App\Http\Requests\Servers\UpdateServerRequest;
 use App\Models\Country;
 use App\Models\Server;
 use App\Models\ServerType;
@@ -19,13 +20,29 @@ class ServersController extends Controller
             'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
             'countries' => Country::select(['id as value', 'name as label'])->get(),
             'createServerUrl' => route('servers.store'),
+            'updateServerUrl' => route('servers.update'),
+            'deleteServerUrl' => route('servers.delete'),
         ]);
     }
 
-    public function store(CreateServerRequest $request): RedirectResponse
+    public function store(UpdateServerRequest $request): RedirectResponse
     {
         Server::create($request->all());
 
         return Redirect::route('servers.index')->with('success', 'Сервер успешно добавлен!');
+    }
+
+    public function update(UpdateServerRequest $request): RedirectResponse
+    {
+        Server::updateOrCreate(['id' => $request->get('id')], $request->all());
+
+        return Redirect::route('servers.index')->with('success', 'Сервер успешно изменён!');
+    }
+
+    public function delete(DeleteServerRequest $request): RedirectResponse
+    {
+        Server::find($request->get('id'))->delete();
+
+        return Redirect::route('servers.index')->with('success', 'Сервер успешно удалён!');
     }
 }

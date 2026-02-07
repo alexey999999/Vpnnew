@@ -4,12 +4,37 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem, CountryForSelect, Server, ServerTypeForSelect } from '@/types';
 import { index as serversIndex } from '@/routes/servers';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, useTemplateRef, inject } from 'vue';
 import Modal from '@/components/Modal.vue';
 import FormItemInput from '@/components/FormItemInput.vue';
 import FormItemSelect from '@/components/FormItemSelect.vue';
+import { SquarePen, Trash2 } from 'lucide-vue-next';
+import { useElementVisibility } from '@vueuse/core';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+
+const deleteServerDialog = (serverId) => {
+    showDeleteServerModal.value = true
+    deleteServerData.value = findServerById(serverId)
+}
+
+const deleteServer = (isConfirmed) => {
+    showDeleteServerModal.value = false
+    
+    if (isConfirmed) {
+        useForm({id: deleteServerData.value.id}).delete(page.props.deleteServerUrl);
+    }
+}
+
+const serverActionsEl = useTemplateRef('serverActions')
+const isVisibleServerActions = useElementVisibility(serverActionsEl)
 
 const showAddServerModal = ref(false);
+const showDeleteServerModal = ref(false);
+const isEditing = ref(false);
+const deleteServerData = ref({
+    id: '',
+    name: '',
+});
 
 watch(showAddServerModal, (isOpen) => {
     // need for disable scroll main content in html body
@@ -21,6 +46,7 @@ watch(showAddServerModal, (isOpen) => {
 });
 
 const form = useForm({
+    id: '',
     name: '',
     server_type_id: '',
     protocol_version: '',
@@ -61,6 +87,7 @@ const serversTableHeaders: string[] = [
 ];
 
 const serversTableTdClasses: string = "border border-gray-300 p-4";
+const serverActionsClasses: string = "fixed right-4 mt-[10px]";
 
 defineProps<{
     servers: Server[];
@@ -84,46 +111,73 @@ watch(isServerTypeSS, (isSS) => {
     }
 });
 
+const openEditServerForm = (serverId) => {
+    isEditing.value = true;
+    showAddServerModal.value = true
+    form.id = serverId
+    Object.assign(form, findServerById(serverId))
+}
+
+const findServerById = (serverId) => {
+    return page.props.servers.find((server) => server.id == serverId)
+}
+
+const saveServerFormSuccess = () => {
+    showAddServerModal.value = false
+    form.reset()
+}
+
 const saveServerForm = () => {
     // Here you can process the data, e.g., send it to an API,
     // save to local storage, or perform validation
 
-    form.post(page.props.createServerUrl, {
-        onSuccess: () => {
-            showAddServerModal.value = false
-            form.reset()
-        }, 
-    });
+    if (isEditing) {
+        form.put(page.props.updateServerUrl, {
+            onSuccess: () => {
+                saveServerFormSuccess()
+            },
+        });
+    } else {
+        form.post(page.props.createServerUrl, {
+            onSuccess: () => {
+                saveServerFormSuccess()
+            },
+        });
+    }
 
     // Example: Send data to a backend server using fetch or axios
-    /*
-    fetch('/api/submit-endpoint', {
-      method: 'POST',
+    /*fetch(isEditing ? page.props.updateServerUrl : page.props.createServerUrl, {
+      method: isEditing ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(formData.value),
+      body: JSON.stringify(form.data()),
     })
     .then(response => response.json())
     .then(data => {
-      console.log('Success:', data);
-      alert('Form saved successfully!');
+        // console.log('Success:', data);
+        // alert('Form saved successfully!');
+        showAddServerModal.value = false
+        form.reset()
     })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
-    */
+    // .catch((error) => {
+    //     console.error('Error:', error);
+    // });*/
 };
 </script>
 
 <template>
     <Head title="Панель управления" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
-        >
+        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <ConfirmationModal :show="showDeleteServerModal"
+                               :title="'Вы действительно хотите удалить сервер ' + deleteServerData.name + '?'"
+                               :message="'Сервер будет перемещён в список удалённых серверов'"
+                               :button="{yes: 'Да', no: 'Отмена'}"
+                               @result="deleteServer"
+            ></ConfirmationModal>
             <Modal :show="showAddServerModal" @close="showAddServerModal = false">
-                <h3 class="text-2xl font-bold mb-4">Добавление сервера</h3>
+                <h3 class="text-2xl font-bold mb-4">{{ isEditing ? 'Редактирование' : 'Добавление' }} сервера</h3>
                 <FormItemInput v-model="form.name" :label="'Название'" :error="page.props.errors.name"></FormItemInput>
                 <FormItemSelect v-model="form.server_type_id" :label="'Тип'" :options="serversTypes" :error="page.props.errors.server_type_id"></FormItemSelect>
                 <FormItemInput v-model="form.protocol_version" :label="'Версия протокола'" :error="page.props.errors.protocol_version"></FormItemInput>
@@ -142,7 +196,7 @@ const saveServerForm = () => {
                 </button>
             </Modal>
             <div>
-                <button @click="showAddServerModal = true"
+                <button @click="form.reset(); isEditing = false; showAddServerModal = true"
                         class="block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer"
                 >
                     Добавить сервер
@@ -156,6 +210,7 @@ const saveServerForm = () => {
                         >
                             {{ serversTableHeader }}
                         </th>
+                        <th ref="serverActions" class="border border-gray-300 p-4"></th>
                     </tr>
                 </thead>
 
@@ -179,6 +234,12 @@ const saveServerForm = () => {
                         <td :class="serversTableTdClasses">{{ server.encryption_method }}</td>
                         <td :class="serversTableTdClasses">{{ server.created_at }}</td>
                         <td :class="serversTableTdClasses">{{ server.updated_at }}</td>
+                        <td :class="[isVisibleServerActions ? serversTableTdClasses : serverActionsClasses]">
+                            <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">
+                                <component :is="SquarePen" @click="openEditServerForm(server.id)" />
+                                <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerDialog(server.id)" />
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
