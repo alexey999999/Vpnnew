@@ -54,6 +54,7 @@ export interface Server {
     encryption_method?: string;
     created_at?: string;
     updated_at?: string;
+    deleted_at?: string;
 }
 
 export interface ServerType {

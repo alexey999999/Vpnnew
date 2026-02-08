@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem, CountryForSelect, Server, ServerTypeForSelect } from '@/types';
 import { index as serversIndex } from '@/routes/servers';
-import { computed, ref, watch, useTemplateRef, inject } from 'vue';
+import { computed, ref, watch, useTemplateRef } from 'vue';
 import Modal from '@/components/Modal.vue';
 import FormItemInput from '@/components/FormItemInput.vue';
 import FormItemSelect from '@/components/FormItemSelect.vue';
@@ -12,7 +12,7 @@ import { SquarePen, Trash2 } from 'lucide-vue-next';
 import { useElementVisibility } from '@vueuse/core';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
-const deleteServerDialog = (serverId) => {
+const deleteServerModal = (serverId) => {
     showDeleteServerModal.value = true
     deleteServerData.value = findServerById(serverId)
 }
@@ -87,7 +87,7 @@ const serversTableHeaders: string[] = [
 ];
 
 const serversTableTdClasses: string = "border border-gray-300 p-4";
-const serverActionsClasses: string = "fixed right-4 mt-[10px]";
+const serverActionsClasses: string = "fixed right-4";
 
 defineProps<{
     servers: Server[];
@@ -169,11 +169,10 @@ const saveServerForm = () => {
 <template>
     <Head title="Панель управления" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <ConfirmationModal :show="showDeleteServerModal"
                                :title="'Вы действительно хотите удалить сервер ' + deleteServerData.name + '?'"
                                :message="'Сервер будет перемещён в список удалённых серверов'"
-                               :button="{yes: 'Да', no: 'Отмена'}"
                                @result="deleteServer"
             ></ConfirmationModal>
             <Modal :show="showAddServerModal" @close="showAddServerModal = false">
@@ -195,54 +194,59 @@ const saveServerForm = () => {
                     Сохранить
                 </button>
             </Modal>
-            <div>
+            <div class="flex justify-between items-center">
                 <button @click="form.reset(); isEditing = false; showAddServerModal = true"
-                        class="block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer"
+                        class="block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer text-left"
                 >
                     Добавить сервер
                 </button>
+                <Link :href="page.props.deletedIndexUrl" as="button" type="button" class="block rounded-md bg-red-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer text-right">
+                    Удалённые серверы
+                </Link>
             </div>
-            <table class="border-collapse border border-gray-400">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th v-for="(serversTableHeader, index) in serversTableHeaders"
-                            :key="index" class="border border-gray-300 p-4"
+            <div class="overflow-x-auto">
+                <table class="border-collapse border border-gray-400">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th v-for="(serversTableHeader, index) in serversTableHeaders"
+                                :key="index" class="border border-gray-300 p-4"
+                            >
+                                {{ serversTableHeader }}
+                            </th>
+                            <th ref="serverActions" class="border border-gray-300 p-4"></th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        <tr v-for="server in servers" :key="server.id"
+                            class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900/50 dark:even:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
-                            {{ serversTableHeader }}
-                        </th>
-                        <th ref="serverActions" class="border border-gray-300 p-4"></th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr v-for="server in servers" :key="server.id"
-                        class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900/50 dark:even:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <td :class="serversTableTdClasses">{{ server.id }}</td>
-                        <td :class="serversTableTdClasses">{{ server.name }}</td>
-                        <td :class="serversTableTdClasses">{{ server.server_type.name }}</td>
-                        <td :class="serversTableTdClasses">{{ server.protocol_version }}</td>
-                        <td :class="serversTableTdClasses">{{ server.ipv4 }}</td>
-                        <td :class="serversTableTdClasses">{{ server.country.name }}</td>
-                        <td :class="serversTableTdClasses">{{ server.url }}</td>
-                        <td :class="serversTableTdClasses">{{ server.main_token }}</td>
-                        <td :class="serversTableTdClasses">{{ server.remote_token }}</td>
-                        <td :class="serversTableTdClasses">{{ server.current_load }}</td>
-                        <td :class="serversTableTdClasses">{{ server.avg_load }}</td>
-                        <td :class="serversTableTdClasses">{{ server.port }}</td>
-                        <td :class="serversTableTdClasses">{{ server.password }}</td>
-                        <td :class="serversTableTdClasses">{{ server.encryption_method }}</td>
-                        <td :class="serversTableTdClasses">{{ server.created_at }}</td>
-                        <td :class="serversTableTdClasses">{{ server.updated_at }}</td>
-                        <td :class="[isVisibleServerActions ? serversTableTdClasses : serverActionsClasses]">
-                            <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">
-                                <component :is="SquarePen" @click="openEditServerForm(server.id)" />
-                                <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerDialog(server.id)" />
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td :class="serversTableTdClasses">{{ server.id }}</td>
+                            <td :class="serversTableTdClasses">{{ server.name }}</td>
+                            <td :class="serversTableTdClasses">{{ server.server_type.name }}</td>
+                            <td :class="serversTableTdClasses">{{ server.protocol_version }}</td>
+                            <td :class="serversTableTdClasses">{{ server.ipv4 }}</td>
+                            <td :class="serversTableTdClasses">{{ server.country.name }}</td>
+                            <td :class="serversTableTdClasses">{{ server.url }}</td>
+                            <td :class="serversTableTdClasses">{{ server.main_token }}</td>
+                            <td :class="serversTableTdClasses">{{ server.remote_token }}</td>
+                            <td :class="serversTableTdClasses">{{ server.current_load }}</td>
+                            <td :class="serversTableTdClasses">{{ server.avg_load }}</td>
+                            <td :class="serversTableTdClasses">{{ server.port }}</td>
+                            <td :class="serversTableTdClasses">{{ server.password }}</td>
+                            <td :class="serversTableTdClasses">{{ server.encryption_method }}</td>
+                            <td :class="serversTableTdClasses">{{ server.created_at }}</td>
+                            <td :class="serversTableTdClasses">{{ server.updated_at }}</td>
+                            <td :class="[isVisibleServerActions ? serversTableTdClasses : serverActionsClasses]">
+                                <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">
+                                    <component :class="'cursor-pointer mb-3'" :is="SquarePen" @click="openEditServerForm(server.id)" />
+                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerModal(server.id)" />
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </AppLayout>
 </template>

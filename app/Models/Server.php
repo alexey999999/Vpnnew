@@ -43,6 +43,7 @@ class Server extends Model
         return [
             'created_at' => 'datetime:' . self::DATE_TIME_FORMAT,
             'updated_at' => 'datetime:' . self::DATE_TIME_FORMAT,
+            'deleted_at' => 'datetime:' . self::DATE_TIME_FORMAT,
         ];
     }
 

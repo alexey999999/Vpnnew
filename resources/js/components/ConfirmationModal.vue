@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
+import { Option } from '@/types';
 
-const props = defineProps({
-    show: Boolean,
-    title: String,
-    message: String,
+interface Props {
+    show: boolean;
+    title: string;
+    message: string;
+    button?: {
+        yes: string,
+        no: string,
+    };
+}
+
+const props =  withDefaults(defineProps<Props>(), {
     button: {
-        no: String,
-        yes: String
+        yes: 'Да',
+        no: 'Отмена',
     }
 });
 
