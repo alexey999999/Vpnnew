@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Trait\WithTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-// TODO: WithTimestampsModel to Trait
-class Server extends WithTimestampsModel
+class Server extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, WithTimestamps;
     
     const RELATION_SERVER_TYPE = 'serverType';
     const RELATION_COUNTRY = 'country';

@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Trait;
 
-use Illuminate\Database\Eloquent\Model;
-
-class WithTimestampsModel extends Model
-{    
+trait WithTimestamps
+{
     protected const DATE_TIME_FORMAT = 'H:i:s d.m.Y';
 
     /**
