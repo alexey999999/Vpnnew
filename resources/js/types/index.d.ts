@@ -37,9 +37,12 @@ export interface User {
     updated_at: string;
 }
 
-export interface Server {
+export interface BaseInterface {
     id: number;
     name: string;
+}
+
+export interface Server extends BaseInterface {
     server_type: ServerType;
     protocol_version: number;
     ipv4: string;
@@ -57,14 +60,9 @@ export interface Server {
     deleted_at?: string;
 }
 
-export interface ServerType {
-    id: number;
-    name: string;
-}
+export interface ServerType extends BaseInterface {}
 
-export interface ConnectionConfiguration {
-    id: number;
-    name: string;
+export interface ConnectionConfiguration extends BaseInterface {
     configuration_type: ConfigurationType;
     servers_in: Server[];
     servers_out: Server[];
@@ -73,18 +71,12 @@ export interface ConnectionConfiguration {
     deleted_at?: string;
 }
 
-// TODO: extends from base interface
-export interface ConfigurationType {
-    id: number;
-    name: string;
-}
+export interface ConfigurationType extends BaseInterface {}
 
 export interface ServerTypeForSelect extends Option {}
 
-export interface Country {
-    id: number;
+export interface Country extends BaseInterface {
     code: string;
-    name: string;
 }
 
 export interface CountryForSelect extends Option {}
