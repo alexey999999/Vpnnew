@@ -2,9 +2,9 @@
 
 import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem, CountryForSelect, Server, ServerTypeForSelect } from '@/types';
-import { index as serversIndex } from '@/routes/servers';
-import { computed, ref, watch, useTemplateRef } from 'vue';
+import { BreadcrumbItem, ConnectionConfiguration } from '@/types';
+import { index as configurationsIndex } from '@/routes/connection-configurations';
+import { ref, watch, useTemplateRef } from 'vue';
 import Modal from '@/components/Modal.vue';
 import FormItemInput from '@/components/FormItemInput.vue';
 import FormItemSelect from '@/components/FormItemSelect.vue';
@@ -62,8 +62,8 @@ const form = useForm({
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Серверы',
-        href: serversIndex().url,
+        title: 'Конфигурации',
+        href: configurationsIndex().url,
     },
 ];
 
@@ -71,17 +71,8 @@ const serversTableHeaders: string[] = [
     'ID',
     'Название',
     'Тип',
-    'Версия протокола',
-    'ipv4',
-    'Страна',
-    'Url',
-    'Главный токен',
-    'Токен сервера',
-    'Текущая нагрузка',
-    'Средняя нагрузка',
-    'Порт',
-    'Пароль',
-    'Метод шифрования',
+    'Входящие сервера',
+    'Исходящие сервера',
     'Создан',
     'Обновлён',
 ];
@@ -90,26 +81,10 @@ const mainTableTdClasses: string = "border border-gray-300 p-4";
 const serverActionsClasses: string = "fixed right-4";
 
 defineProps<{
-    servers: Server[];
-    serversTypes: ServerTypeForSelect[];
-    countries: CountryForSelect[];
+    connectionConfigurations: ConnectionConfiguration[];
 }>();
 
 const page = usePage()
-
-const isServerTypeSS: string = computed(() => {
-    return page.props.serversTypes.find((serverType) => {
-        return serverType.value === form.server_type_id && serverType.label == 'ss'
-    })
-});
-
-watch(isServerTypeSS, (isSS) => {
-    if (!isSS) {
-        form.port = ''
-        form.password = ''
-        form.encryption_method = ''
-    }
-});
 
 const openEditServerForm = (serverId) => {
     isEditing.value = true;
@@ -119,7 +94,7 @@ const openEditServerForm = (serverId) => {
 }
 
 const findServerById = (serverId) => {
-    return page.props.servers.find((server) => server.id == serverId)
+    return page.props.servers.find((server) => connectionConfiguration.id == serverId)
 }
 
 const saveServerFormSuccess = () => {
@@ -167,7 +142,7 @@ const saveServerForm = () => {
 </script>
 
 <template>
-    <Head title="Серверы" />
+    <Head title="Конфигурации" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <ConfirmationModal :show="showDeleteServerModal"
@@ -198,10 +173,10 @@ const saveServerForm = () => {
                 <button @click="form.reset(); isEditing = false; showAddServerModal = true"
                         class="block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer text-left"
                 >
-                    Добавить сервер
+                    Добавить конфигурацию
                 </button>
                 <Link :href="page.props.deletedIndexUrl" as="button" type="button" class="block rounded-md bg-red-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer text-right">
-                    Удалённые серверы
+                    Удалённые конфигурации
                 </Link>
             </div>
             <div class="overflow-x-auto">
@@ -218,29 +193,28 @@ const saveServerForm = () => {
                     </thead>
     
                     <tbody>
-                        <tr v-for="server in servers" :key="server.id"
+                        <tr v-for="connectionConfiguration in connectionConfigurations" :key="connectionConfiguration.id"
                             class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900/50 dark:even:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
-                            <td :class="mainTableTdClasses">{{ server.id }}</td>
-                            <td :class="mainTableTdClasses">{{ server.name }}</td>
-                            <td :class="mainTableTdClasses">{{ server.server_type.name }}</td>
-                            <td :class="mainTableTdClasses">{{ server.protocol_version }}</td>
-                            <td :class="mainTableTdClasses">{{ server.ipv4 }}</td>
-                            <td :class="mainTableTdClasses">{{ server.country.name }}</td>
-                            <td :class="mainTableTdClasses">{{ server.url }}</td>
-                            <td :class="mainTableTdClasses">{{ server.main_token }}</td>
-                            <td :class="mainTableTdClasses">{{ server.remote_token }}</td>
-                            <td :class="mainTableTdClasses">{{ server.current_load }}</td>
-                            <td :class="mainTableTdClasses">{{ server.avg_load }}</td>
-                            <td :class="mainTableTdClasses">{{ server.port }}</td>
-                            <td :class="mainTableTdClasses">{{ server.password }}</td>
-                            <td :class="mainTableTdClasses">{{ server.encryption_method }}</td>
-                            <td :class="mainTableTdClasses">{{ server.created_at }}</td>
-                            <td :class="mainTableTdClasses">{{ server.updated_at }}</td>
-                            <td :class="[isVisibleServerActions ? mainTableTdClasses : serverActionsClasses]">
-                                <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">
-                                    <component :class="'cursor-pointer mb-3'" :is="SquarePen" @click="openEditServerForm(server.id)" />
-                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerModal(server.id)" />
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.id }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.name }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.configuration_type.name }}</td>
+                            <td :class="mainTableTdClasses">
+                                <template v-for="(serverIn, index) in connectionConfiguration.servers_in">
+                                    {{ serverIn.name }}<template v-if="index !== connectionConfiguration.servers_in.length - 1">, </template>
+                                </template>
+                            </td>
+                            <td :class="mainTableTdClasses">
+                                <template v-for="(serverOut, index) in connectionConfiguration.servers_out">
+                                    {{ serverOut.name }}<template v-if="index !== connectionConfiguration.servers_out.length - 1">, </template>
+                                </template>
+                            </td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.created_at }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.updated_at }}</td>
+                            <td :class="mainTableTdClasses">
+                                <div :class="''">
+                                    <component :class="'cursor-pointer mb-3'" :is="SquarePen" @click="openEditServerForm(connectionConfiguration.id)" />
+                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerModal(connectionConfiguration.id)" />
                                 </div>
                             </td>
                         </tr>

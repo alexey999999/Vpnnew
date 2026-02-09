@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Server extends Model
+// TODO: WithTimestampsModel to Trait
+class Server extends WithTimestampsModel
 {
     use HasFactory, SoftDeletes;
+    
+    const RELATION_SERVER_TYPE = 'serverType';
+    const RELATION_COUNTRY = 'country';
 
     /**
      * The attributes that are mass assignable.
@@ -30,22 +34,6 @@ class Server extends Model
         'password',
         'encryption_method',
     ];
-    
-    protected const DATE_TIME_FORMAT = 'H:i:s d.m.Y';
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'created_at' => 'datetime:' . self::DATE_TIME_FORMAT,
-            'updated_at' => 'datetime:' . self::DATE_TIME_FORMAT,
-            'deleted_at' => 'datetime:' . self::DATE_TIME_FORMAT,
-        ];
-    }
 
     public function country() {
         return $this->hasOne(Country::class, 'id', 'country_id');
@@ -53,5 +41,15 @@ class Server extends Model
 
     public function serverType() {
         return $this->hasOne(ServerType::class, 'id', 'server_type_id');
+    }
+
+    public function connectionsIn(): BelongsToMany
+    {
+        return $this->belongsToMany(ConnectionConfiguration::class, 'configuration_servers_in', 'server_in_id', 'connection_configuration_id')->withTimestamps();
+    }
+
+    public function connectionsOut(): BelongsToMany
+    {
+        return $this->belongsToMany(ConnectionConfiguration::class, 'configuration_servers_out', 'server_out_id', 'connection_configuration_id')->withTimestamps();
     }
 }

@@ -62,6 +62,23 @@ export interface ServerType {
     name: string;
 }
 
+export interface ConnectionConfiguration {
+    id: number;
+    name: string;
+    configuration_type: ConfigurationType;
+    servers_in: Server[];
+    servers_out: Server[];
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string;
+}
+
+// TODO: extends from base interface
+export interface ConfigurationType {
+    id: number;
+    name: string;
+}
+
 export interface ServerTypeForSelect extends Option {}
 
 export interface Country {

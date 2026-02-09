@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
+// import NavUser from '@/components/NavUser.vue';
+// import NavFooter from '@/components/NavFooter.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -12,11 +12,12 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as serversIndex } from '@/routes/servers';
+import { index as configurationsIndex } from '@/routes/connection-configurations';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Server } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Server, ListCollapse } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import { index as serversIndex } from '@/routes/servers';
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,6 +29,11 @@ const mainNavItems: NavItem[] = [
         title: 'Серверы',
         href: serversIndex(),
         icon: Server,
+    },
+    {
+        title: 'Конфигурации',
+        href: configurationsIndex(),
+        icon: ListCollapse,
     },
 ];
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Servers\DeleteServerRequest;
 use App\Http\Requests\Servers\RestoreServerRequest;
 use App\Http\Requests\Servers\UpdateServerRequest;
+use App\Models\ConnectionConfiguration;
 use App\Models\Country;
 use App\Models\Server;
 use App\Models\ServerType;
@@ -12,14 +13,16 @@ use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ServersController extends Controller
+class ConnectionConfigurationsController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('servers/Index', [
-            'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->get(),
-            'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
-            'countries' => Country::select(['id as value', 'name as label'])->get(),
+        return Inertia::render('connection-configurations/Index', [
+            'connectionConfigurations' => ConnectionConfiguration::with([
+                ConnectionConfiguration::RELATION_CONFIGURATION_TYPE,
+                ConnectionConfiguration::RELATION_SERVERS_IN,
+                ConnectionConfiguration::RELATION_SERVERS_OUT
+            ])->get(),
             'createServerUrl' => route('servers.store'),
             'updateServerUrl' => route('servers.update'),
             'deleteServerUrl' => route('servers.delete'),
@@ -50,14 +53,15 @@ class ServersController extends Controller
 
     public function deletedIndex(): Response
     {
+        // TODO: rename DeletedIndex to Deleted
         return Inertia::render('servers/DeletedIndex', [
             'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->onlyTrashed()->get(),
             'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
             'countries' => Country::select(['id as value', 'name as label'])->get(),
             'restoreServerUrl' => route('servers.deleted.restore'),
-            'restoreAllServersUrl' => route('servers.deleted.restore-all'),
-            'finallyDeleteServerUrl' => route('servers.deleted.finally-delete'),
-            'finallyDeleteAllServersUrl' => route('servers.deleted.finally-delete-all'),
+            'restoreAllServersUrl' => route('servers.deleted.restoreAll'),
+            'finallyDeleteServerUrl' => route('servers.deleted.finallyDelete'),
+            'finallyDeleteAllServersUrl' => route('servers.deleted.finallyDeleteAll'),
         ]);
     }
 

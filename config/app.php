@@ -130,4 +130,13 @@ return [
     'servers' => [
         'seeder_num_rows' => env('SERVERS_SEEDER_NUM_ROWS', 10),
     ],
+
+    'connection_configurations' => [
+        'seeder' => [
+            'num_rows' => env('CONNECTION_CONFIGURATIONS_SEEDER_NUM_ROWS', 10),
+            'max_shadow_socks_servers_in' => env('MAX_SHADOW_SOCKS_SERVERS_IN_CONNECTION_CONFIGURATIONS_SEEDER', 3),
+            'max_shadow_socks_servers_out' => env('MAX_SHADOW_SOCKS_SERVERS_OUT_CONNECTION_CONFIGURATIONS_SEEDER', 3),
+            'max_double_vpn_servers_out' => env('MAX_DOUBLE_VPN_SERVERS_OUT_CONNECTION_CONFIGURATIONS_SEEDER', 3),
+        ],
+    ],
 ];

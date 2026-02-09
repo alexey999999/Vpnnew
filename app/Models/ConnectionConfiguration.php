@@ -4,14 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ConnectionConfiguration extends Model
+class ConnectionConfiguration extends WithTimestampsModel
 {
     use HasFactory, SoftDeletes;
+
+    const RELATION_CONFIGURATION_TYPE = 'configurationType';
+    const RELATION_SERVERS_IN = 'serversIn';
+    const RELATION_SERVERS_OUT = 'serversOut';
 
     protected $fillable = ['name', 'configuration_type_id'];
 
@@ -30,11 +33,11 @@ class ConnectionConfiguration extends Model
 
     public function serversIn(): BelongsToMany
     {
-        return $this->belongsToMany(Server::class, 'configuration_servers_in', 'connection_configuration_id', 'server_in_id')->withTimestamps();;
+        return $this->belongsToMany(Server::class, 'configuration_servers_in', 'connection_configuration_id', 'server_in_id')->withTimestamps();
     }
 
     public function serversOut(): BelongsToMany
     {
-        return $this->belongsToMany(Server::class, 'configuration_servers_out', 'connection_configuration_id', 'server_out_id')->withTimestamps();;
+        return $this->belongsToMany(Server::class, 'configuration_servers_out', 'connection_configuration_id', 'server_out_id')->withTimestamps();
     }
 }

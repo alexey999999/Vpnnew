@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             ServerTypeSeeder::class,
             ServerSeeder::class,
             ConfigurationTypeSeeder::class,
+            ConnectionConfigurationSeeder::class,
         ]);
     }
 }

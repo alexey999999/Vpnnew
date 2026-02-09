@@ -9,7 +9,10 @@ class ConfigurationTypeSeeder extends Seeder
 {
     public function run()
     {
-        $configurationTypeArr = ['ShadowSocks', 'DoubleVPN'];
+        $configurationTypeArr = [
+            ConfigurationType::SHADOW_SOCKS,
+            ConfigurationType::DOUBLE_VPN,
+        ];
 
         foreach ($configurationTypeArr as $configurationType)
         {
