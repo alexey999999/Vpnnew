@@ -53,8 +53,7 @@ class ConnectionConfigurationsController extends Controller
 
     public function deletedIndex(): Response
     {
-        // TODO: rename DeletedIndex to Deleted
-        return Inertia::render('servers/DeletedIndex', [
+        return Inertia::render('servers/Deleted', [
             'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->onlyTrashed()->get(),
             'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
             'countries' => Country::select(['id as value', 'name as label'])->get(),
