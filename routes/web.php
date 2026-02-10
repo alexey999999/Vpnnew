@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::prefix('deleted')
                 ->name('deleted.')
                 ->group(function () {
-                    Route::get('/', [ServersController::class, 'deletedIndex'])->name('index');
+                    Route::get('/', [ServersController::class, 'deleted'])->name('index');
                     Route::put('/', [ServersController::class, 'restore'])->name('restore');
                     Route::put('restore-all', [ServersController::class, 'restoreAll'])->name('restore-all');
                     Route::delete('/', [ServersController::class, 'finallyDelete'])->name('finally-delete');
@@ -41,6 +41,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('connection-configurations.')
         ->group(function () {
             Route::get('/', [ConnectionConfigurationsController::class, 'index'])->name('index');
+            Route::post('/', [ConnectionConfigurationsController::class, 'store'])->name('store');
+            Route::put('/', [ConnectionConfigurationsController::class, 'update'])->name('update');
+            Route::delete('/', [ConnectionConfigurationsController::class, 'delete'])->name('delete');
+
+            Route::prefix('deleted')
+                ->name('deleted.')
+                ->group(function () {
+                    Route::get('/', [ConnectionConfigurationsController::class, 'deleted'])->name('index');
+                    Route::put('/', [ConnectionConfigurationsController::class, 'restore'])->name('restore');
+                    Route::put('restore-all', [ConnectionConfigurationsController::class, 'restoreAll'])->name('restore-all');
+                    Route::delete('/', [ConnectionConfigurationsController::class, 'finallyDelete'])->name('finally-delete');
+                    Route::delete('all', [ConnectionConfigurationsController::class, 'finallyDeleteAll'])->name('finally-delete-all');
+                });
         });
 });
 

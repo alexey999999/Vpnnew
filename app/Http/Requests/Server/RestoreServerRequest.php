@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Servers;
+namespace App\Http\Requests\Server;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DeleteServerRequest extends FormRequest
+class RestoreServerRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

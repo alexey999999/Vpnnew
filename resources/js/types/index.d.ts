@@ -62,17 +62,6 @@ export interface Server extends BaseInterface {
 
 export interface ServerType extends BaseInterface {}
 
-export interface ConnectionConfiguration extends BaseInterface {
-    configuration_type: ConfigurationType;
-    servers_in: Server[];
-    servers_out: Server[];
-    created_at?: string;
-    updated_at?: string;
-    deleted_at?: string;
-}
-
-export interface ConfigurationType extends BaseInterface {}
-
 export interface ServerTypeForSelect extends Option {}
 
 export interface Country extends BaseInterface {
@@ -85,5 +74,32 @@ export interface Option {
     value: number;
     label: string;
 }
+
+export interface ConnectionConfiguration extends BaseInterface {
+    configuration_type: ConfigurationType;
+    servers_in: Server[];
+    servers_out: Server[];
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string;
+}
+
+export interface ConfigurationType extends BaseInterface {}
+
+export interface ConfigurationsTypeNames {
+    shadowSocks: string;
+    doubleVpn: string;
+}
+
+export interface ServerTypeNames {
+    ss: string;
+    vpnIo: string;
+    vpnIn: string;
+    vpnOut: string;
+}
+
+export interface ConfigurationTypeForSelect extends Option {}
+
+export interface ServerForSelect extends Option {}
 
 export type BreadcrumbItemType = BreadcrumbItem;

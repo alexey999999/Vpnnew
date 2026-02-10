@@ -39,7 +39,7 @@ class ServerSeeder extends Seeder
             $country = Country::inRandomOrder()->first();
 
             $item = [
-                'name' => 'server-' . fake()->slug(1),
+                'name' => 'server-' . $serverType->name . '-'. fake()->slug(1),
                 'server_type_id' => $serverType->id,
                 'ipv4' => fake()->ipv4(),
                 'protocol_version' => fake()->randomFloat(2, 0, 10),

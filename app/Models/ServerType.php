@@ -15,9 +15,9 @@ use Illuminate\Support\Carbon;
 class ServerType extends Model
 {
     use HasFactory;
-    
+
+    const SS = 'ss';
     const VPN_IO = 'vpn_io';
     const VPN_IN = 'vpn_in';
     const VPN_OUT = 'vpn_out';
-    const SS = 'ss';
 }

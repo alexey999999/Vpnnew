@@ -131,7 +131,7 @@ const saveServerForm = () => {
     // Here you can process the data, e.g., send it to an API,
     // save to local storage, or perform validation
 
-    if (isEditing) {
+    if (isEditing.value) {
         form.put(page.props.updateServerUrl, {
             onSuccess: () => {
                 saveServerFormSuccess()
@@ -175,8 +175,7 @@ const saveServerForm = () => {
                                :message="'Сервер будет перемещён в список удалённых серверов'"
                                @result="deleteServer"
             ></ConfirmationModal>
-            <Modal :show="showAddServerModal" @close="showAddServerModal = false">
-                <h3 class="text-2xl font-bold mb-4">{{ isEditing ? 'Редактирование' : 'Добавление' }} сервера</h3>
+            <Modal :show="showAddServerModal" :title="(isEditing ? 'Редактирование' : 'Добавление') + ' сервера'" @close="showAddServerModal = false">
                 <FormItemInput v-model="form.name" :label="'Название'" :error="page.props.errors.name"></FormItemInput>
                 <FormItemSelect v-model="form.server_type_id" :label="'Тип'" :options="serversTypes" :error="page.props.errors.server_type_id"></FormItemSelect>
                 <FormItemInput v-model="form.protocol_version" :label="'Версия протокола'" :error="page.props.errors.protocol_version"></FormItemInput>
@@ -200,7 +199,7 @@ const saveServerForm = () => {
                 >
                     Добавить сервер
                 </button>
-                <Link :href="page.props.deletedIndexUrl" as="button" type="button" class="block rounded-md bg-red-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer text-right">
+                <Link :href="page.props.deletedUrl" as="button" type="button" class="block rounded-md bg-red-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer text-right">
                     Удалённые серверы
                 </Link>
             </div>

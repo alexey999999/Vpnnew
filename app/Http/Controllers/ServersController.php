@@ -1,9 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Servers\DeleteServerRequest;
-use App\Http\Requests\Servers\RestoreServerRequest;
-use App\Http\Requests\Servers\UpdateServerRequest;
+use App\Http\Requests\Server\DeleteServerRequest;
+use App\Http\Requests\Server\RestoreServerRequest;
+use App\Http\Requests\Server\UpdateServerRequest;
 use App\Models\Country;
 use App\Models\Server;
 use App\Models\ServerType;
@@ -23,7 +23,7 @@ class ServersController extends Controller
             'createServerUrl' => route('servers.store'),
             'updateServerUrl' => route('servers.update'),
             'deleteServerUrl' => route('servers.delete'),
-            'deletedIndexUrl' => route('servers.deleted.index'),
+            'deletedUrl' => route('servers.deleted.index'),
         ]);
     }
 
@@ -48,7 +48,7 @@ class ServersController extends Controller
         return Redirect::route('servers.index')->with('success', 'Сервер успешно удалён!');
     }
 
-    public function deletedIndex(): Response
+    public function deleted(): Response
     {
         return Inertia::render('servers/Deleted', [
             'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->onlyTrashed()->get(),

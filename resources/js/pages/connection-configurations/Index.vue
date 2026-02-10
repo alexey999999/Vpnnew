@@ -2,9 +2,14 @@
 
 import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem, ConnectionConfiguration } from '@/types';
+import {
+    BreadcrumbItem,
+    ConnectionConfiguration,
+    ConfigurationTypeForSelect,
+    ConfigurationsTypeNames, ServerTypeNames, ServerForSelect
+} from '@/types';
 import { index as configurationsIndex } from '@/routes/connection-configurations';
-import { ref, watch, useTemplateRef } from 'vue';
+import { ref, watch, useTemplateRef, computed } from 'vue';
 import Modal from '@/components/Modal.vue';
 import FormItemInput from '@/components/FormItemInput.vue';
 import FormItemSelect from '@/components/FormItemSelect.vue';
@@ -28,15 +33,19 @@ const deleteServer = (isConfirmed) => {
 const serverActionsEl = useTemplateRef('serverActions')
 const isVisibleServerActions = useElementVisibility(serverActionsEl)
 
-const showAddServerModal = ref(false);
+const isServersInMultiSelect = ref(false);
+const serversSelectDisabled = ref(true);
+const showAddConfigurationModal = ref(false);
 const showDeleteServerModal = ref(false);
 const isEditing = ref(false);
 const deleteServerData = ref({
     id: '',
     name: '',
 });
+const serversIn = ref([]);
+const serversOut = ref([]);
 
-watch(showAddServerModal, (isOpen) => {
+watch(showAddConfigurationModal, (isOpen) => {
     // need for disable scroll main content in html body
     if (isOpen) {
         document.documentElement.classList.add('overflow-y-hidden');
@@ -48,16 +57,9 @@ watch(showAddServerModal, (isOpen) => {
 const form = useForm({
     id: '',
     name: '',
-    server_type_id: '',
-    protocol_version: '',
-    ipv4: '',
-    country_id: '',
-    url: '',
-    main_token: '',
-    remote_token: '',
-    port: '',
-    password: '',
-    encryption_method: '',
+    configuration_type_id: '',
+    servers_in_ids: '',
+    servers_out_ids: '',
 });
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -71,8 +73,8 @@ const serversTableHeaders: string[] = [
     'ID',
     'Название',
     'Тип',
-    'Входящие сервера',
-    'Исходящие сервера',
+    'Входящие серверы',
+    'Исходящие серверы',
     'Создан',
     'Обновлён',
 ];
@@ -82,13 +84,51 @@ const serverActionsClasses: string = "fixed right-4";
 
 defineProps<{
     connectionConfigurations: ConnectionConfiguration[];
+    configurationsTypes: ConfigurationTypeForSelect[];
+    configurationsTypeNames: ConfigurationsTypeNames;
+    serverTypeNames: ServerTypeNames;
+    serversShadowSocksIn: ServerForSelect[];
+    serversShadowSocksOut: ServerForSelect[];
+    serversDoubleVpnIn: ServerForSelect[];
+    serversDoubleVpnOut: ServerForSelect[];
 }>();
 
 const page = usePage()
 
+
+const configurationType: string = computed(() => {
+    return page.props.configurationsTypes.find((configurationsType) => {
+        return configurationsType.value === form.configuration_type_id
+    });
+});
+
+watch(configurationType, (newConfigurationType: ConfigurationTypeForSelect) => {
+    form.servers_in_ids = '';
+    form.servers_out_ids = '';
+    
+    if (typeof newConfigurationType === "undefined") {
+        serversSelectDisabled.value = true;
+    } else {
+        serversSelectDisabled.value = false;
+
+        switch (newConfigurationType.label) {
+            case page.props.configurationsTypeNames.shadowSocks:
+                isServersInMultiSelect.value = true;
+                serversIn.value = page.props.serversShadowSocksIn;
+                serversOut.value = page.props.serversShadowSocksOut;
+                break;
+            case page.props.configurationsTypeNames.doubleVpn:
+                isServersInMultiSelect.value = false;
+                serversIn.value = page.props.serversDoubleVpnIn;
+                serversOut.value = page.props.serversDoubleVpnOut;
+                break;
+        }
+    }
+});
+
 const openEditServerForm = (serverId) => {
     isEditing.value = true;
-    showAddServerModal.value = true
+    showAddConfigurationModal.value = true
     form.id = serverId
     Object.assign(form, findServerById(serverId))
 }
@@ -98,22 +138,26 @@ const findServerById = (serverId) => {
 }
 
 const saveServerFormSuccess = () => {
-    showAddServerModal.value = false
+    showAddConfigurationModal.value = false
     form.reset()
 }
 
-const saveServerForm = () => {
+const saveConnectionConfigurationForm = () => {
     // Here you can process the data, e.g., send it to an API,
     // save to local storage, or perform validation
+    console.log('isEditing')
+    console.log(isEditing)
 
-    if (isEditing) {
-        form.put(page.props.updateServerUrl, {
+    if (isEditing.value) {
+        console.log('update')
+        form.put(page.props.updateConnectionConfigurationUrl, {
             onSuccess: () => {
                 saveServerFormSuccess()
             },
         });
     } else {
-        form.post(page.props.createServerUrl, {
+        console.log('create')
+        form.post(page.props.createConnectionConfigurationUrl, {
             onSuccess: () => {
                 saveServerFormSuccess()
             },
@@ -132,7 +176,7 @@ const saveServerForm = () => {
     .then(data => {
         // console.log('Success:', data);
         // alert('Form saved successfully!');
-        showAddServerModal.value = false
+        showAddConfigurationModal.value = false
         form.reset()
     })
     // .catch((error) => {
@@ -150,32 +194,25 @@ const saveServerForm = () => {
                                :message="'Сервер будет перемещён в список удалённых серверов'"
                                @result="deleteServer"
             ></ConfirmationModal>
-            <Modal :show="showAddServerModal" @close="showAddServerModal = false">
-                <h3 class="text-2xl font-bold mb-4">{{ isEditing ? 'Редактирование' : 'Добавление' }} сервера</h3>
+            <Modal :show="showAddConfigurationModal" :title="(isEditing ? 'Редактирование' : 'Добавление') + ' конфигурации'" @close="showAddConfigurationModal = false">
                 <FormItemInput v-model="form.name" :label="'Название'" :error="page.props.errors.name"></FormItemInput>
-                <FormItemSelect v-model="form.server_type_id" :label="'Тип'" :options="serversTypes" :error="page.props.errors.server_type_id"></FormItemSelect>
-                <FormItemInput v-model="form.protocol_version" :label="'Версия протокола'" :error="page.props.errors.protocol_version"></FormItemInput>
-                <FormItemInput v-model="form.ipv4" :label="'ipv4'" :error="page.props.errors.ipv4"></FormItemInput>
-                <FormItemSelect v-model="form.country_id" :label="'Страна'" :options="countries" :error="page.props.errors.country_id"></FormItemSelect>
-                <FormItemInput v-model="form.url" :label="'Url'" :error="page.props.errors.url"></FormItemInput>
-                <FormItemInput v-model="form.main_token" :label="'Главный токен'" :error="page.props.errors.main_token"></FormItemInput>
-                <FormItemInput v-model="form.remote_token" :label="'Токен сервера'" :error="page.props.errors.remote_token"></FormItemInput>
-                <FormItemInput v-if="isServerTypeSS" v-model="form.port" :label="'Порт'" :error="page.props.errors.port"></FormItemInput>
-                <FormItemInput v-if="isServerTypeSS" v-model="form.password" :label="'Пароль'" :error="page.props.errors.password"></FormItemInput>
-                <FormItemInput v-if="isServerTypeSS" v-model="form.encryption_method" :label="'Метод шифрования'" :error="page.props.errors.encryption_method"></FormItemInput>
-                <button @click="saveServerForm" :disabled="form.processing"
+                <FormItemSelect v-model="form.configuration_type_id" :label="'Тип'" :options="configurationsTypes" :error="page.props.errors.configuration_type_id"></FormItemSelect>
+                <FormItemSelect v-model="form.servers_in_ids" :label="'Входящие серверы'" :options="serversIn" :error="page.props.errors.servers_in_ids" :isMulti="isServersInMultiSelect" :isDisabled="serversSelectDisabled"></FormItemSelect>
+                <FormItemSelect v-model="form.servers_out_ids" :label="'Исходящие серверы'" :options="serversOut" :error="page.props.errors.servers_out_ids" :isMulti="true" :isDisabled="serversSelectDisabled"></FormItemSelect>
+                
+                <button @click="saveConnectionConfigurationForm" :disabled="form.processing"
                         class="block rounded-md bg-emerald-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500 focus:outline-none cursor-pointer"
                 >
                     Сохранить
                 </button>
             </Modal>
             <div class="flex justify-between items-center">
-                <button @click="form.reset(); isEditing = false; showAddServerModal = true"
+                <button @click="form.reset(); isEditing = false; showAddConfigurationModal = true"
                         class="block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer text-left"
                 >
                     Добавить конфигурацию
                 </button>
-                <Link :href="page.props.deletedIndexUrl" as="button" type="button" class="block rounded-md bg-red-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer text-right">
+                <Link :href="page.props.deletedUrl" as="button" type="button" class="block rounded-md bg-red-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer text-right">
                     Удалённые конфигурации
                 </Link>
             </div>

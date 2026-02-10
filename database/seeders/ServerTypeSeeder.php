@@ -10,10 +10,10 @@ class ServerTypeSeeder extends Seeder
     public function run()
     {
         $serverTypeArr = [
+            ServerType::SS,
             ServerType::VPN_IO,
             ServerType::VPN_IN,
             ServerType::VPN_OUT,
-            ServerType::SS,
         ];
 
         foreach ($serverTypeArr as $serverType)

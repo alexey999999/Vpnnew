@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Servers\DeleteServerRequest;
-use App\Http\Requests\Servers\RestoreServerRequest;
-use App\Http\Requests\Servers\UpdateServerRequest;
+use App\Http\Requests\ConnectionConfiguration\UpdateConnectionConfigurationRequest;
+use App\Http\Requests\ConnectionConfiguration\DeleteConnectionConfigurationRequest;
+use App\Http\Requests\ConnectionConfiguration\RestoreConnectionConfigurationRequest;
+use App\Models\ConfigurationType;
 use App\Models\ConnectionConfiguration;
 use App\Models\Country;
 use App\Models\Server;
@@ -23,72 +24,103 @@ class ConnectionConfigurationsController extends Controller
                 ConnectionConfiguration::RELATION_SERVERS_IN,
                 ConnectionConfiguration::RELATION_SERVERS_OUT
             ])->get(),
-            'createServerUrl' => route('servers.store'),
-            'updateServerUrl' => route('servers.update'),
-            'deleteServerUrl' => route('servers.delete'),
-            'deletedIndexUrl' => route('servers.deleted.index'),
+            'configurationsTypeNames' => [
+                'shadowSocks' => ConfigurationType::SHADOW_SOCKS,
+                'doubleVpn' => ConfigurationType::DOUBLE_VPN,
+            ],
+            'serverTypeNames' => [
+                'ss' => ServerType::SS,
+                'vpnIo' => ServerType::VPN_IO,
+                'vpnIn' => ServerType::VPN_IN,
+                'vpnOut' => ServerType::VPN_OUT,
+            ],
+            'configurationsTypes' => ConfigurationType::select(['id as value', 'name as label'])->get(),
+            'serversShadowSocksIn' => Server::select(['id as value', 'name as label'])
+                ->whereHas(Server::RELATION_SERVER_TYPE, function ($query) {
+                    $query->where('name', ServerType::SS);
+                })->get(),
+            'serversShadowSocksOut' => Server::select(['id as value', 'name as label'])
+                ->whereHas(Server::RELATION_SERVER_TYPE, function ($query) {
+                    $query->where('name', ServerType::VPN_IO);
+                })->get(),
+            'serversDoubleVpnIn' => Server::select(['id as value', 'name as label'])
+                ->whereHas(Server::RELATION_SERVER_TYPE, function ($query) {
+                    $query->where('name', ServerType::VPN_IN);
+                })->get(),
+            'serversDoubleVpnOut' => Server::select(['id as value', 'name as label'])
+                ->whereHas(Server::RELATION_SERVER_TYPE, function ($query) {
+                    $query->where('name', ServerType::VPN_OUT);
+                })->get(),
+            'createConnectionConfigurationUrl' => route('connection-configurations.store'),
+            'updateConnectionConfigurationUrl' => route('connection-configurations.update'),
+            'deleteServerUrl' => route('connection-configurations.delete'),
+            'deletedUrl' => route('connection-configurations.deleted.index'),
         ]);
     }
 
-    public function store(UpdateServerRequest $request): RedirectResponse
+    public function store(UpdateConnectionConfigurationRequest $request): RedirectResponse
     {
-        Server::create($request->all());
+        /** @var ConnectionConfiguration $connectionConfiguration */
+        $connectionConfiguration = ConnectionConfiguration::create($request->all());
 
-        return Redirect::route('servers.index')->with('success', 'Сервер успешно добавлен!');
+        $connectionConfiguration->serversIn()->attach($request->get('servers_in_ids'));
+        $connectionConfiguration->serversOut()->attach($request->get('servers_out_ids'));
+
+        return Redirect::route('connection-configurations.index')->with('success', 'Сервер успешно добавлен!');
     }
 
-    public function update(UpdateServerRequest $request): RedirectResponse
+    public function update(UpdateConnectionConfigurationRequest $request): RedirectResponse
     {
-        Server::updateOrCreate(['id' => $request->get('id')], $request->all());
+        ConnectionConfiguration::updateOrCreate(['id' => $request->get('id')], $request->all());
 
-        return Redirect::route('servers.index')->with('success', 'Сервер успешно изменён!');
+        return Redirect::route('connection-configurations.index')->with('success', 'Сервер успешно изменён!');
     }
 
-    public function delete(DeleteServerRequest $request): RedirectResponse
+    public function delete(DeleteConnectionConfigurationRequest $request): RedirectResponse
     {
-        Server::find($request->get('id'))->delete();
+        ConnectionConfiguration::find($request->get('id'))->delete();
 
-        return Redirect::route('servers.index')->with('success', 'Сервер успешно удалён!');
+        return Redirect::route('connection-configurations.index')->with('success', 'Сервер успешно удалён!');
     }
 
-    public function deletedIndex(): Response
+    public function deleted(): Response
     {
         return Inertia::render('servers/Deleted', [
             'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->onlyTrashed()->get(),
             'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
             'countries' => Country::select(['id as value', 'name as label'])->get(),
-            'restoreServerUrl' => route('servers.deleted.restore'),
-            'restoreAllServersUrl' => route('servers.deleted.restoreAll'),
-            'finallyDeleteServerUrl' => route('servers.deleted.finallyDelete'),
-            'finallyDeleteAllServersUrl' => route('servers.deleted.finallyDeleteAll'),
+            'restoreServerUrl' => route('connection-configurations.deleted.restore'),
+            'restoreAllServersUrl' => route('connection-configurations.deleted.restoreAll'),
+            'finallyDeleteServerUrl' => route('connection-configurations.deleted.finallyDelete'),
+            'finallyDeleteAllServersUrl' => route('connection-configurations.deleted.finallyDeleteAll'),
         ]);
     }
 
-    public function restore(RestoreServerRequest $request): RedirectResponse
+    public function restore(RestoreConnectionConfigurationRequest $request): RedirectResponse
     {
-        Server::onlyTrashed()->find($request->get('id'))->restore();
+        ConnectionConfiguration::onlyTrashed()->find($request->get('id'))->restore();
 
-        return Redirect::route('servers.deleted.index')->with('success', 'Сервер успешно восстановлен!');
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Сервер успешно восстановлен!');
     }
 
     public function restoreAll(): RedirectResponse
     {
-        Server::onlyTrashed()->restore();
+        ConnectionConfiguration::onlyTrashed()->restore();
 
-        return Redirect::route('servers.deleted.index')->with('success', 'Все серверы успешно восстановлены!');
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Все серверы успешно восстановлены!');
     }
 
-    public function finallyDelete(DeleteServerRequest $request): RedirectResponse
+    public function finallyDelete(DeleteConnectionConfigurationRequest $request): RedirectResponse
     {
-        Server::onlyTrashed()->find($request->get('id'))->forceDelete();
+        ConnectionConfiguration::onlyTrashed()->find($request->get('id'))->forceDelete();
 
-        return Redirect::route('servers.deleted.index')->with('success', 'Сервер окончательно и безвозвратно удалён!');
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Сервер окончательно и безвозвратно удалён!');
     }
 
     public function finallyDeleteAll(): RedirectResponse
     {
-        Server::onlyTrashed()->forceDelete();
+        ConnectionConfiguration::onlyTrashed()->forceDelete();
 
-        return Redirect::route('servers.deleted.index')->with('success', 'Все серверы окончательно и безвозвратно удалены!');
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Все серверы окончательно и безвозвратно удалены!');
     }
 }
