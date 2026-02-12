@@ -4,12 +4,12 @@ import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem, CountryForSelect, Server, ServerTypeForSelect } from '@/types';
 import { index as serversIndex } from '@/routes/servers';
-import { computed, ref, watch, useTemplateRef } from 'vue';
+import { computed, ref, watch/*, useTemplateRef*/ } from 'vue';
 import Modal from '@/components/Modal.vue';
 import FormItemInput from '@/components/FormItemInput.vue';
 import FormItemSelect from '@/components/FormItemSelect.vue';
 import { SquarePen, Trash2 } from 'lucide-vue-next';
-import { useElementVisibility } from '@vueuse/core';
+// import { useElementVisibility } from '@vueuse/core';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
 const deleteServerModal = (serverId) => {
@@ -25,8 +25,8 @@ const deleteServer = (isConfirmed) => {
     }
 }
 
-const serverActionsEl = useTemplateRef('serverActions')
-const isVisibleServerActions = useElementVisibility(serverActionsEl)
+// const serverActionsEl = useTemplateRef('serverActions')
+// const isVisibleServerActions = useElementVisibility(serverActionsEl)
 
 const showAddServerModal = ref(false);
 const showDeleteServerModal = ref(false);
@@ -67,7 +67,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const serversTableHeaders: string[] = [
+const mainTableHeaders: string[] = [
     'ID',
     'Название',
     'Тип',
@@ -87,7 +87,7 @@ const serversTableHeaders: string[] = [
 ];
 
 const mainTableTdClasses: string = "border border-gray-300 p-4";
-const serverActionsClasses: string = "fixed right-4";
+// const serverActionsClasses: string = "fixed right-4";
 
 defineProps<{
     servers: Server[];
@@ -128,9 +128,6 @@ const saveServerFormSuccess = () => {
 }
 
 const saveServerForm = () => {
-    // Here you can process the data, e.g., send it to an API,
-    // save to local storage, or perform validation
-
     if (isEditing.value) {
         form.put(page.props.updateServerUrl, {
             onSuccess: () => {
@@ -207,10 +204,10 @@ const saveServerForm = () => {
                 <table class="border-collapse border border-gray-400">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th v-for="(serversTableHeader, index) in serversTableHeaders"
+                            <th v-for="(mainTableHeader, index) in mainTableHeaders"
                                 :key="index" class="border border-gray-300 p-4"
                             >
-                                {{ serversTableHeader }}
+                                {{ mainTableHeader }}
                             </th>
                             <th ref="serverActions" class="border border-gray-300 p-4"></th>
                         </tr>
@@ -236,8 +233,10 @@ const saveServerForm = () => {
                             <td :class="mainTableTdClasses">{{ server.encryption_method }}</td>
                             <td :class="mainTableTdClasses">{{ server.created_at }}</td>
                             <td :class="mainTableTdClasses">{{ server.updated_at }}</td>
-                            <td :class="[isVisibleServerActions ? mainTableTdClasses : serverActionsClasses]">
-                                <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">
+<!--                            <td :class="[isVisibleServerActions ? mainTableTdClasses : serverActionsClasses]">-->
+<!--                                <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">-->
+                            <td :class="mainTableTdClasses">
+                                <div :class="''">
                                     <component :class="'cursor-pointer mb-3'" :is="SquarePen" @click="openEditServerForm(server.id)" />
                                     <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerModal(server.id)" />
                                 </div>

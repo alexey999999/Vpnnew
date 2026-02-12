@@ -6,7 +6,6 @@ use App\Http\Requests\ConnectionConfiguration\DeleteConnectionConfigurationReque
 use App\Http\Requests\ConnectionConfiguration\RestoreConnectionConfigurationRequest;
 use App\Models\ConfigurationType;
 use App\Models\ConnectionConfiguration;
-use App\Models\Country;
 use App\Models\Server;
 use App\Models\ServerType;
 use Illuminate\Http\RedirectResponse;
@@ -16,9 +15,11 @@ use Inertia\Response;
 
 class ConnectionConfigurationsController extends Controller
 {
+    private const COMPONENT_NAME = 'connection-configurations';
+    
     public function index(): Response
     {
-        return Inertia::render('connection-configurations/Index', [
+        return Inertia::render(self::COMPONENT_NAME . '/Index', [
             'connectionConfigurations' => ConnectionConfiguration::with([
                 ConnectionConfiguration::RELATION_CONFIGURATION_TYPE,
                 ConnectionConfiguration::RELATION_SERVERS_IN,
@@ -53,7 +54,7 @@ class ConnectionConfigurationsController extends Controller
                 })->get(),
             'createConnectionConfigurationUrl' => route('connection-configurations.store'),
             'updateConnectionConfigurationUrl' => route('connection-configurations.update'),
-            'deleteServerUrl' => route('connection-configurations.delete'),
+            'deleteConnectionConfigurationUrl' => route('connection-configurations.delete'),
             'deletedUrl' => route('connection-configurations.deleted.index'),
         ]);
     }
@@ -66,33 +67,47 @@ class ConnectionConfigurationsController extends Controller
         $connectionConfiguration->serversIn()->attach($request->get('servers_in_ids'));
         $connectionConfiguration->serversOut()->attach($request->get('servers_out_ids'));
 
-        return Redirect::route('connection-configurations.index')->with('success', 'Сервер успешно добавлен!');
+        return Redirect::route('connection-configurations.index')->with('success', 'Конфигурация успешно добавлена!');
     }
 
     public function update(UpdateConnectionConfigurationRequest $request): RedirectResponse
     {
-        ConnectionConfiguration::updateOrCreate(['id' => $request->get('id')], $request->all());
+        /** @var ConnectionConfiguration $connectionConfiguration */
+        $connectionConfiguration = ConnectionConfiguration::updateOrCreate(['id' => $request->get('id')], $request->all());
 
-        return Redirect::route('connection-configurations.index')->with('success', 'Сервер успешно изменён!');
+        $connectionConfigurationServersIn = $connectionConfiguration->serversIn();
+        $connectionConfigurationServersOut = $connectionConfiguration->serversOut();
+
+        $connectionConfigurationServersIn->detach();
+        $connectionConfigurationServersOut->detach();
+
+        $connectionConfigurationServersIn->attach($request->get('servers_in_ids'));
+        $connectionConfigurationServersOut->attach($request->get('servers_out_ids'));
+
+        return Redirect::route('connection-configurations.index')->with('success', 'Конфигурация успешно изменёна!');
     }
 
     public function delete(DeleteConnectionConfigurationRequest $request): RedirectResponse
     {
         ConnectionConfiguration::find($request->get('id'))->delete();
 
-        return Redirect::route('connection-configurations.index')->with('success', 'Сервер успешно удалён!');
+        return Redirect::route('connection-configurations.index')->with('success', 'Конфигурация успешно удалена!');
     }
 
     public function deleted(): Response
     {
-        return Inertia::render('servers/Deleted', [
-            'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->onlyTrashed()->get(),
-            'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
-            'countries' => Country::select(['id as value', 'name as label'])->get(),
-            'restoreServerUrl' => route('connection-configurations.deleted.restore'),
-            'restoreAllServersUrl' => route('connection-configurations.deleted.restoreAll'),
-            'finallyDeleteServerUrl' => route('connection-configurations.deleted.finallyDelete'),
-            'finallyDeleteAllServersUrl' => route('connection-configurations.deleted.finallyDeleteAll'),
+        return Inertia::render(self::COMPONENT_NAME . '/Deleted', [
+            'connectionConfigurations' => ConnectionConfiguration::with([
+                    ConnectionConfiguration::RELATION_CONFIGURATION_TYPE,
+                    ConnectionConfiguration::RELATION_SERVERS_IN,
+                    ConnectionConfiguration::RELATION_SERVERS_OUT
+                ])
+                ->onlyTrashed()
+                ->get(),
+            'restoreConnectionConfigurationUrl' => route('connection-configurations.deleted.restore'),
+            'restoreAllConnectionConfigurationsUrl' => route('connection-configurations.deleted.restore-all'),
+            'finallyDeleteConnectionConfigurationUrl' => route('connection-configurations.deleted.finally-delete'),
+            'finallyDeleteAllConnectionConfigurationsUrl' => route('connection-configurations.deleted.finally-delete-all'),
         ]);
     }
 
@@ -100,27 +115,41 @@ class ConnectionConfigurationsController extends Controller
     {
         ConnectionConfiguration::onlyTrashed()->find($request->get('id'))->restore();
 
-        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Сервер успешно восстановлен!');
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Конфигурация успешно восстановлена!');
     }
 
     public function restoreAll(): RedirectResponse
     {
         ConnectionConfiguration::onlyTrashed()->restore();
 
-        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Все серверы успешно восстановлены!');
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Все конфигурации успешно восстановлены!');
     }
 
     public function finallyDelete(DeleteConnectionConfigurationRequest $request): RedirectResponse
     {
-        ConnectionConfiguration::onlyTrashed()->find($request->get('id'))->forceDelete();
+        /** @var ConnectionConfiguration $connectionConfiguration */
+        $connectionConfiguration = ConnectionConfiguration::onlyTrashed()->find($request->get('id'));
 
-        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Сервер окончательно и безвозвратно удалён!');
+        $connectionConfiguration->serversIn()->detach();
+        $connectionConfiguration->serversOut()->detach();
+
+        $connectionConfiguration->forceDelete();
+
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Конфигурация окончательно и безвозвратно удалена!');
     }
 
     public function finallyDeleteAll(): RedirectResponse
     {
-        ConnectionConfiguration::onlyTrashed()->forceDelete();
+        /** @var ConnectionConfiguration $connectionConfiguration */
+        $connectionConfigurations = ConnectionConfiguration::onlyTrashed();
 
-        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Все серверы окончательно и безвозвратно удалены!');
+        $connectionConfigurations->each(function ($connectionConfiguration) {
+            $connectionConfiguration->serversIn()->detach();
+            $connectionConfiguration->serversOut()->detach();
+        });
+
+        $connectionConfigurations->forceDelete();
+
+        return Redirect::route('connection-configurations.deleted.index')->with('success', 'Все конфигурации окончательно и безвозвратно удалены!');
     }
 }

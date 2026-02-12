@@ -9,7 +9,10 @@ const message = computed(() => page.props.flash.success);
 watch(message, (newMessage) => {
     if (newMessage) {
         show.value = true;
-        setTimeout(() => show.value = false, 3000); // Hide after 3 seconds
+        setTimeout(() => {
+            show.value = false;
+            page.props.flash.success = '' // need for mass same message
+        }, 3000); // Hide after 3 seconds
     }
 });
 </script>

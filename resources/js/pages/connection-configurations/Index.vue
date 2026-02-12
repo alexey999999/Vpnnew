@@ -9,39 +9,39 @@ import {
     ConfigurationsTypeNames, ServerTypeNames, ServerForSelect
 } from '@/types';
 import { index as configurationsIndex } from '@/routes/connection-configurations';
-import { ref, watch, useTemplateRef, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import Modal from '@/components/Modal.vue';
 import FormItemInput from '@/components/FormItemInput.vue';
 import FormItemSelect from '@/components/FormItemSelect.vue';
 import { SquarePen, Trash2 } from 'lucide-vue-next';
-import { useElementVisibility } from '@vueuse/core';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
-const deleteServerModal = (serverId) => {
-    showDeleteServerModal.value = true
-    deleteServerData.value = findServerById(serverId)
+const deleteConnectionConfigurationModal = (connectionConfigurationId) => {
+    showDeleteConnectionConfigurationModal.value = true
+    deleteConnectionConfigurationData.value = findConnectionConfigurationById(connectionConfigurationId)
 }
 
-const deleteServer = (isConfirmed) => {
-    showDeleteServerModal.value = false
+const deleteConnectionConfiguration = (isConfirmed) => {
+    showDeleteConnectionConfigurationModal.value = false
     
     if (isConfirmed) {
-        useForm({id: deleteServerData.value.id}).delete(page.props.deleteServerUrl);
+        useForm({id: deleteConnectionConfigurationData.value.id}).delete(page.props.deleteConnectionConfigurationUrl);
     }
 }
-
-const serverActionsEl = useTemplateRef('serverActions')
-const isVisibleServerActions = useElementVisibility(serverActionsEl)
 
 const isServersInMultiSelect = ref(false);
 const serversSelectDisabled = ref(true);
 const showAddConfigurationModal = ref(false);
-const showDeleteServerModal = ref(false);
+const showDeleteConnectionConfigurationModal = ref(false);
 const isEditing = ref(false);
-const deleteServerData = ref({
+const isOpenEditingForm = ref(false);
+const deleteConnectionConfigurationData = ref({
     id: '',
     name: '',
 });
+
+const page = usePage()
+
 const serversIn = ref([]);
 const serversOut = ref([]);
 
@@ -69,7 +69,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const serversTableHeaders: string[] = [
+const mainTableHeaders: string[] = [
     'ID',
     'Название',
     'Тип',
@@ -80,7 +80,6 @@ const serversTableHeaders: string[] = [
 ];
 
 const mainTableTdClasses: string = "border border-gray-300 p-4";
-const serverActionsClasses: string = "fixed right-4";
 
 defineProps<{
     connectionConfigurations: ConnectionConfiguration[];
@@ -93,9 +92,6 @@ defineProps<{
     serversDoubleVpnOut: ServerForSelect[];
 }>();
 
-const page = usePage()
-
-
 const configurationType: string = computed(() => {
     return page.props.configurationsTypes.find((configurationsType) => {
         return configurationsType.value === form.configuration_type_id
@@ -103,13 +99,18 @@ const configurationType: string = computed(() => {
 });
 
 watch(configurationType, (newConfigurationType: ConfigurationTypeForSelect) => {
-    form.servers_in_ids = '';
-    form.servers_out_ids = '';
-    
     if (typeof newConfigurationType === "undefined") {
         serversSelectDisabled.value = true;
+        form.servers_in_ids = '';
+        form.servers_out_ids = '';
     } else {
         serversSelectDisabled.value = false;
+        
+        if (!isOpenEditingForm.value) {
+            // clear only by manual change ConfigurationType
+            form.servers_in_ids = '';
+            form.servers_out_ids = '';
+        }
 
         switch (newConfigurationType.label) {
             case page.props.configurationsTypeNames.shadowSocks:
@@ -126,62 +127,67 @@ watch(configurationType, (newConfigurationType: ConfigurationTypeForSelect) => {
     }
 });
 
-const openEditServerForm = (serverId) => {
+const openEditConnectionConfigurationForm = async (connectionConfigurationId) => {
+    form.reset()
+
     isEditing.value = true;
+    isOpenEditingForm.value = true;
     showAddConfigurationModal.value = true
-    form.id = serverId
-    Object.assign(form, findServerById(serverId))
+    let connectionConfiguration = findConnectionConfigurationById(connectionConfigurationId);
+    let connectionConfigurationForm = {
+        id: connectionConfiguration.id,
+        name: connectionConfiguration.name,
+        configuration_type_id: connectionConfiguration.configuration_type_id,
+        servers_out_ids: connectionConfiguration.servers_out.map(connectionConfiguration => connectionConfiguration.id),
+    }
+
+    switch (connectionConfiguration.configuration_type.name) {
+        case page.props.configurationsTypeNames.shadowSocks:
+            isServersInMultiSelect.value = true;
+
+            serversIn.value = page.props.serversShadowSocksIn;
+            serversOut.value = page.props.serversShadowSocksOut;
+
+            connectionConfigurationForm.servers_in_ids = connectionConfiguration.servers_in.map(connectionConfiguration => connectionConfiguration.id);
+            break;
+        case page.props.configurationsTypeNames.doubleVpn:
+            isServersInMultiSelect.value = false;
+
+            serversIn.value = page.props.serversDoubleVpnIn;
+            serversOut.value = page.props.serversDoubleVpnOut;
+
+            connectionConfigurationForm.servers_in_ids = connectionConfiguration.servers_in[0].id;
+            break;
+    }
+
+    // await need for wait handle computed and watch configurationType
+    await Object.assign(form, connectionConfigurationForm)
+    isOpenEditingForm.value = false;
 }
 
-const findServerById = (serverId) => {
-    return page.props.servers.find((server) => connectionConfiguration.id == serverId)
+const findConnectionConfigurationById = (connectionConfigurationId) => {
+    return page.props.connectionConfigurations.find((connectionConfiguration) => connectionConfiguration.id == connectionConfigurationId)
 }
 
-const saveServerFormSuccess = () => {
+const saveConnectionConfigurationFormSuccess = () => {
     showAddConfigurationModal.value = false
     form.reset()
 }
 
 const saveConnectionConfigurationForm = () => {
-    // Here you can process the data, e.g., send it to an API,
-    // save to local storage, or perform validation
-    console.log('isEditing')
-    console.log(isEditing)
-
     if (isEditing.value) {
-        console.log('update')
         form.put(page.props.updateConnectionConfigurationUrl, {
             onSuccess: () => {
-                saveServerFormSuccess()
+                saveConnectionConfigurationFormSuccess()
             },
         });
     } else {
-        console.log('create')
         form.post(page.props.createConnectionConfigurationUrl, {
             onSuccess: () => {
-                saveServerFormSuccess()
+                saveConnectionConfigurationFormSuccess()
             },
         });
     }
-
-    // Example: Send data to a backend server using fetch or axios
-    /*fetch(isEditing ? page.props.updateServerUrl : page.props.createServerUrl, {
-      method: isEditing ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(form.data()),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // console.log('Success:', data);
-        // alert('Form saved successfully!');
-        showAddConfigurationModal.value = false
-        form.reset()
-    })
-    // .catch((error) => {
-    //     console.error('Error:', error);
-    // });*/
 };
 </script>
 
@@ -189,16 +195,32 @@ const saveConnectionConfigurationForm = () => {
     <Head title="Конфигурации" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <ConfirmationModal :show="showDeleteServerModal"
-                               :title="'Вы действительно хотите удалить сервер ' + deleteServerData.name + '?'"
-                               :message="'Сервер будет перемещён в список удалённых серверов'"
-                               @result="deleteServer"
+            <ConfirmationModal :show="showDeleteConnectionConfigurationModal"
+                               :title="'Вы действительно хотите удалить конфигурацию ' + deleteConnectionConfigurationData.name + '?'"
+                               :message="'Конфигурация будет перемещена в список удалённых конфигураций'"
+                               @result="deleteConnectionConfiguration"
             ></ConfirmationModal>
             <Modal :show="showAddConfigurationModal" :title="(isEditing ? 'Редактирование' : 'Добавление') + ' конфигурации'" @close="showAddConfigurationModal = false">
                 <FormItemInput v-model="form.name" :label="'Название'" :error="page.props.errors.name"></FormItemInput>
-                <FormItemSelect v-model="form.configuration_type_id" :label="'Тип'" :options="configurationsTypes" :error="page.props.errors.configuration_type_id"></FormItemSelect>
-                <FormItemSelect v-model="form.servers_in_ids" :label="'Входящие серверы'" :options="serversIn" :error="page.props.errors.servers_in_ids" :isMulti="isServersInMultiSelect" :isDisabled="serversSelectDisabled"></FormItemSelect>
-                <FormItemSelect v-model="form.servers_out_ids" :label="'Исходящие серверы'" :options="serversOut" :error="page.props.errors.servers_out_ids" :isMulti="true" :isDisabled="serversSelectDisabled"></FormItemSelect>
+                <FormItemSelect v-model="form.configuration_type_id"
+                                :label="'Тип'"
+                                :options="configurationsTypes"
+                                :error="page.props.errors.configuration_type_id"
+                ></FormItemSelect>
+                <FormItemSelect v-model="form.servers_in_ids"
+                                :label="'Входящие серверы'"
+                                :options="serversIn"
+                                :error="page.props.errors.servers_in_ids"
+                                :isMulti="isServersInMultiSelect"
+                                :isDisabled="serversSelectDisabled"
+                ></FormItemSelect>
+                <FormItemSelect v-model="form.servers_out_ids"
+                                :label="'Исходящие серверы'"
+                                :options="serversOut"
+                                :error="page.props.errors.servers_out_ids"
+                                :isMulti="true"
+                                :isDisabled="serversSelectDisabled"
+                ></FormItemSelect>
                 
                 <button @click="saveConnectionConfigurationForm" :disabled="form.processing"
                         class="block rounded-md bg-emerald-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-500 focus:outline-none cursor-pointer"
@@ -220,12 +242,12 @@ const saveConnectionConfigurationForm = () => {
                 <table class="border-collapse border border-gray-400">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th v-for="(serversTableHeader, index) in serversTableHeaders"
+                            <th v-for="(mainTableHeader, index) in mainTableHeaders"
                                 :key="index" class="border border-gray-300 p-4"
                             >
-                                {{ serversTableHeader }}
+                                {{ mainTableHeader }}
                             </th>
-                            <th ref="serverActions" class="border border-gray-300 p-4"></th>
+                            <th class="border border-gray-300 p-4"></th>
                         </tr>
                     </thead>
     
@@ -250,8 +272,8 @@ const saveConnectionConfigurationForm = () => {
                             <td :class="mainTableTdClasses">{{ connectionConfiguration.updated_at }}</td>
                             <td :class="mainTableTdClasses">
                                 <div :class="''">
-                                    <component :class="'cursor-pointer mb-3'" :is="SquarePen" @click="openEditServerForm(connectionConfiguration.id)" />
-                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteServerModal(connectionConfiguration.id)" />
+                                    <component :class="'cursor-pointer mb-3'" :is="SquarePen" @click="openEditConnectionConfigurationForm(connectionConfiguration.id)" />
+                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="deleteConnectionConfigurationModal(connectionConfiguration.id)" />
                                 </div>
                             </td>
                         </tr>

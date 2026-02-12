@@ -14,9 +14,11 @@ use Inertia\Response;
 
 class ServersController extends Controller
 {
+    private const COMPONENT_NAME = 'servers';
+
     public function index(): Response
     {
-        return Inertia::render('servers/Index', [
+        return Inertia::render(self::COMPONENT_NAME . '/Index', [
             'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->get(),
             'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
             'countries' => Country::select(['id as value', 'name as label'])->get(),
@@ -50,7 +52,7 @@ class ServersController extends Controller
 
     public function deleted(): Response
     {
-        return Inertia::render('servers/Deleted', [
+        return Inertia::render(self::COMPONENT_NAME . '/Deleted', [
             'servers' => Server::with([Server::RELATION_SERVER_TYPE, Server::RELATION_COUNTRY])->onlyTrashed()->get(),
             'serversTypes' => ServerType::select(['id as value', 'name as label'])->get(),
             'countries' => Country::select(['id as value', 'name as label'])->get(),

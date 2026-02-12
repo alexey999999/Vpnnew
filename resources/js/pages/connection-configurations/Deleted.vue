@@ -2,172 +2,156 @@
 
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem, CountryForSelect, Server, ServerTypeForSelect } from '@/types';
-import { index as serversIndex } from '@/routes/servers';
-import { index as serversDeletedIndex } from '@/routes/servers/deleted';
+import { BreadcrumbItem, ConnectionConfiguration } from '@/types';
+import { index as configurationsIndex } from '@/routes/connection-configurations';
+import { index as configurationsDeletedIndex } from '@/routes/connection-configurations/deleted';
 import { ref, useTemplateRef } from 'vue';
 import { ArchiveRestore, Trash2 } from 'lucide-vue-next';
-import { useElementVisibility } from '@vueuse/core';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
-const restoreServerModal = (serverId) => {
-    showRestoreServerModal.value = true
-    restoreServerData.value = findServerById(serverId)
+const restoreConnectionConfigurationModal = (connectionConfigurationId) => {
+    showRestoreConnectionConfigurationModal.value = true
+    restoreConnectionConfigurationData.value = findConnectionConfigurationById(connectionConfigurationId)
 }
 
-const restoreServer = (isConfirmed) => {
-    showRestoreServerModal.value = false
+const restoreConnectionConfiguration = (isConfirmed) => {
+    showRestoreConnectionConfigurationModal.value = false
     
     if (isConfirmed) {
-        useForm({id: restoreServerData.value.id}).put(page.props.restoreServerUrl);
+        useForm({id: restoreConnectionConfigurationData.value.id}).put(page.props.restoreConnectionConfigurationUrl);
     }
 }
 
 const restoreAllServersModal = () => {
-    showRestoreAllServersModal.value = true
+    showRestoreAllConnectionConfigurationsModal.value = true
 }
 
-const restoreAllServers = (isConfirmed) => {
-    showRestoreAllServersModal.value = false
+const restoreAllConnectionConfigurations = (isConfirmed) => {
+    showRestoreAllConnectionConfigurationsModal.value = false
     
     if (isConfirmed) {
-        useForm().put(page.props.restoreAllServersUrl);
+        useForm().put(page.props.restoreAllConnectionConfigurationsUrl);
     }
 }
 
-const finallyDeleteServerModal = (serverId) => {
-    showFinallyDeleteServerModal.value = true
-    finallyDeleteServerData.value = findServerById(serverId)
+const finallyDeleteConnectionConfigurationModal = (connectionConfigurationId) => {
+    showFinallyDeleteConnectionConfigurationModal.value = true
+    finallyDeleteConnectionConfigurationData.value = findConnectionConfigurationById(connectionConfigurationId)
 }
 
-const finallyDeleteServer = (isConfirmed) => {
-    showFinallyDeleteServerModal.value = false
+const finallyDeleteConnectionConfiguration = (isConfirmed) => {
+    showFinallyDeleteConnectionConfigurationModal.value = false
 
     if (isConfirmed) {
-        useForm({id: finallyDeleteServerData.value.id}).delete(page.props.finallyDeleteServerUrl);
+        useForm({id: finallyDeleteConnectionConfigurationData.value.id}).delete(page.props.finallyDeleteConnectionConfigurationUrl);
     }
 }
 
 const finallyDeleteAllServersModal = () => {
-    showFinallyDeleteAllServersModal.value = true
+    showFinallyDeleteAllConnectionConfigurationsModal.value = true
 }
 
-const finallyDeleteAllServers = (isConfirmed) => {
-    showFinallyDeleteAllServersModal.value = false
+const finallyDeleteAllConnectionConfigurations = (isConfirmed) => {
+    showFinallyDeleteAllConnectionConfigurationsModal.value = false
     
     if (isConfirmed) {
-        useForm().delete(page.props.finallyDeleteAllServersUrl);
+        useForm().delete(page.props.finallyDeleteAllConnectionConfigurationsUrl);
     }
 }
 
-const serverActionsEl = useTemplateRef('serverActions')
-const isVisibleServerActions = useElementVisibility(serverActionsEl)
+const showRestoreConnectionConfigurationModal = ref(false);
+const showRestoreAllConnectionConfigurationsModal = ref(false);
+const showFinallyDeleteConnectionConfigurationModal = ref(false);
+const showFinallyDeleteAllConnectionConfigurationsModal = ref(false);
 
-const showRestoreServerModal = ref(false);
-const showRestoreAllServersModal = ref(false);
-const showFinallyDeleteServerModal = ref(false);
-const showFinallyDeleteAllServersModal = ref(false);
-
-const restoreServerData = ref({
+const restoreConnectionConfigurationData = ref({
     id: '',
     name: '',
 });
 
-const finallyDeleteServerData = ref({
+const finallyDeleteConnectionConfigurationData = ref({
     id: '',
     name: '',
 });
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Серверы',
-        href: serversIndex().url,
+        title: 'Конфигурации',
+        href: configurationsIndex().url,
     },
     {
-        title: 'Удалённые серверы',
-        href: serversDeletedIndex().url,
+        title: 'Удалённые конфигурации',
+        href: configurationsDeletedIndex().url,
     },
 ];
 
-const serversTableHeaders: string[] = [
+const connectionConfigurationsTableHeaders: string[] = [
     'ID',
     'Название',
     'Тип',
-    'Версия протокола',
-    'ipv4',
-    'Страна',
-    'Url',
-    'Главный токен',
-    'Токен сервера',
-    'Текущая нагрузка',
-    'Средняя нагрузка',
-    'Порт',
-    'Пароль',
-    'Метод шифрования',
+    'Входящие конфигурации',
+    'Исходящие конфигурации',
     'Создан',
     'Обновлён',
     'Удалён',
 ];
 
-const serversTableTdClasses: string = "border border-gray-300 p-4";
-const serverActionsClasses: string = "fixed right-4";
+const mainTableTdClasses: string = "border border-gray-300 p-4";
 
 defineProps<{
-    servers: Server[];
-    serversTypes: ServerTypeForSelect[];
-    countries: CountryForSelect[];
+    connectionConfigurations: ConnectionConfiguration[];
 }>();
 
 const page = usePage()
 
-const findServerById = (serverId) => {
-    return page.props.servers.find((server) => server.id == serverId)
+const findConnectionConfigurationById = (connectionConfigurationId) => {
+    return page.props.connectionConfigurations.find((connectionConfiguration) => connectionConfiguration.id == connectionConfigurationId)
 }
 </script>
 
 <template>
-    <Head title="Удалённые серверы" />
+    <Head title="Удалённые конфигурации" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <ConfirmationModal :show="showRestoreServerModal"
-                               :title="'Вы действительно хотите восстановить сервер ' + restoreServerData.name + '?'"
-                               :message="'Сервер будет перемещён в список серверов'"
-                               @result="restoreServer"
+            <ConfirmationModal :show="showRestoreConnectionConfigurationModal"
+                               :title="'Вы действительно хотите восстановить конфигурацию ' + restoreConnectionConfigurationData.name + '?'"
+                               :message="'Конфигурация будет перемещена в список конфигураций'"
+                               @result="restoreConnectionConfiguration"
             ></ConfirmationModal>
-            <ConfirmationModal :show="showRestoreAllServersModal"
-                               :title="'Вы действительно хотите восстановить ВСЕ серверы?'"
-                               :message="'ВНИМАНИЕ! ВСЕ!!! Серверы будут восстановлены!'"
-                               @result="restoreAllServers"
+            <ConfirmationModal :show="showRestoreAllConnectionConfigurationsModal"
+                               :title="'Вы действительно хотите восстановить ВСЕ конфигурации?'"
+                               :message="'ВНИМАНИЕ! ВСЕ!!! Конфигурации будут восстановлены!'"
+                               @result="restoreAllConnectionConfigurations"
             ></ConfirmationModal>
-            <ConfirmationModal :show="showFinallyDeleteServerModal"
-                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить сервер ' + finallyDeleteServerData.name + '?'"
-                               :message="'ВНИМАНИЕ! Сервер будет БЕЗВОЗВРАТНО удалён!'"
-                               @result="finallyDeleteServer"
+            <ConfirmationModal :show="showFinallyDeleteConnectionConfigurationModal"
+                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить конфигурацию ' + finallyDeleteConnectionConfigurationData.name + '?'"
+                               :message="'ВНИМАНИЕ! конфигурацию будет БЕЗВОЗВРАТНО удалён!'"
+                               @result="finallyDeleteConnectionConfiguration"
             ></ConfirmationModal>
-            <ConfirmationModal :show="showFinallyDeleteAllServersModal"
-                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить ВСЕ серверы?'"
-                               :message="'ВНИМАНИЕ! ВСЕ!!! Серверы будут БЕЗВОЗВРАТНО удалены!'"
-                               @result="finallyDeleteAllServers"
+            <ConfirmationModal :show="showFinallyDeleteAllConnectionConfigurationsModal"
+                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить ВСЕ конфигурации?'"
+                               :message="'ВНИМАНИЕ! ВСЕ!!! Конфигурации будут БЕЗВОЗВРАТНО удалены!'"
+                               @result="finallyDeleteAllConnectionConfigurations"
             ></ConfirmationModal>
             <div>
-                <button v-if="servers.length > 0"
+                <button v-if="connectionConfigurations.length > 0"
                         @click="restoreAllServersModal"
                         class="inline-block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer"
                 >
-                    Восстановить все серверы
+                    Восстановить все конфигурации
                 </button>
-                <button v-if="servers.length > 0"
+                <button v-if="connectionConfigurations.length > 0"
                         @click="finallyDeleteAllServersModal"
                         class="inline-block rounded-md bg-red-500/80 ml-3 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer"
                 >
-                    БЕЗВОЗВРАТНО удалить все серверы
+                    БЕЗВОЗВРАТНО удалить все конфигурации
                 </button>
             </div>
             <div class="overflow-x-auto">
                 <table class="border-collapse border border-gray-400">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th v-for="(serversTableHeader, index) in serversTableHeaders"
+                            <th v-for="(serversTableHeader, index) in connectionConfigurationsTableHeaders"
                                 :key="index" class="border border-gray-300 p-4"
                             >
                                 {{ serversTableHeader }}
@@ -177,30 +161,29 @@ const findServerById = (serverId) => {
                     </thead>
     
                     <tbody>
-                        <tr v-for="server in servers" :key="server.id"
+                        <tr v-for="connectionConfiguration in connectionConfigurations" :key="connectionConfiguration.id"
                             class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900/50 dark:even:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
-                            <td :class="serversTableTdClasses">{{ server.id }}</td>
-                            <td :class="serversTableTdClasses">{{ server.name }}</td>
-                            <td :class="serversTableTdClasses">{{ server.server_type.name }}</td>
-                            <td :class="serversTableTdClasses">{{ server.protocol_version }}</td>
-                            <td :class="serversTableTdClasses">{{ server.ipv4 }}</td>
-                            <td :class="serversTableTdClasses">{{ server.country.name }}</td>
-                            <td :class="serversTableTdClasses">{{ server.url }}</td>
-                            <td :class="serversTableTdClasses">{{ server.main_token }}</td>
-                            <td :class="serversTableTdClasses">{{ server.remote_token }}</td>
-                            <td :class="serversTableTdClasses">{{ server.current_load }}</td>
-                            <td :class="serversTableTdClasses">{{ server.avg_load }}</td>
-                            <td :class="serversTableTdClasses">{{ server.port }}</td>
-                            <td :class="serversTableTdClasses">{{ server.password }}</td>
-                            <td :class="serversTableTdClasses">{{ server.encryption_method }}</td>
-                            <td :class="serversTableTdClasses">{{ server.created_at }}</td>
-                            <td :class="serversTableTdClasses">{{ server.updated_at }}</td>
-                            <td :class="serversTableTdClasses">{{ server.deleted_at }}</td>
-                            <td :class="[isVisibleServerActions ? serversTableTdClasses : serverActionsClasses]">
-                                <div :class="[isVisibleServerActions ? '' : 'bg-white p-2']">
-                                    <component :class="'cursor-pointer mb-3'" :is="ArchiveRestore" @click="restoreServerModal(server.id)" />
-                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="finallyDeleteServerModal(server.id)" />
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.id }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.name }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.configuration_type.name }}</td>
+                            <td :class="mainTableTdClasses">
+                                <template v-for="(serverIn, index) in connectionConfiguration.servers_in">
+                                    {{ serverIn.name }}<template v-if="index !== connectionConfiguration.servers_in.length - 1">, </template>
+                                </template>
+                            </td>
+                            <td :class="mainTableTdClasses">
+                                <template v-for="(serverOut, index) in connectionConfiguration.servers_out">
+                                    {{ serverOut.name }}<template v-if="index !== connectionConfiguration.servers_out.length - 1">, </template>
+                                </template>
+                            </td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.created_at }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.updated_at }}</td>
+                            <td :class="mainTableTdClasses">{{ connectionConfiguration.deleted_at }}</td>
+                            <td :class="mainTableTdClasses">
+                                <div :class="''">
+                                    <component :class="'cursor-pointer mb-3'" :is="ArchiveRestore" @click="restoreConnectionConfigurationModal(connectionConfiguration.id)" />
+                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="finallyDeleteConnectionConfigurationModal(connectionConfiguration.id)" />
                                 </div>
                             </td>
                         </tr>
