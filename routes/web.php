@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConnectionConfigurationsController;
 use App\Http\Controllers\ServersController;
+use App\Http\Controllers\TariffsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -53,6 +54,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     Route::put('restore-all', [ConnectionConfigurationsController::class, 'restoreAll'])->name('restore-all');
                     Route::delete('/', [ConnectionConfigurationsController::class, 'finallyDelete'])->name('finally-delete');
                     Route::delete('all', [ConnectionConfigurationsController::class, 'finallyDeleteAll'])->name('finally-delete-all');
+                });
+        });
+
+    Route::prefix('tariffs')
+        ->name('tariffs.')
+        ->group(function () {
+            Route::get('/', [TariffsController::class, 'index'])->name('index');
+            Route::post('/', [TariffsController::class, 'store'])->name('store');
+            Route::put('/', [TariffsController::class, 'update'])->name('update');
+            Route::delete('/', [TariffsController::class, 'delete'])->name('delete');
+
+            Route::prefix('deleted')
+                ->name('deleted.')
+                ->group(function () {
+                    Route::get('/', [TariffsController::class, 'deleted'])->name('index');
+                    Route::put('/', [TariffsController::class, 'restore'])->name('restore');
+                    Route::put('restore-all', [TariffsController::class, 'restoreAll'])->name('restore-all');
+                    Route::delete('/', [TariffsController::class, 'finallyDelete'])->name('finally-delete');
+                    Route::delete('all', [TariffsController::class, 'finallyDeleteAll'])->name('finally-delete-all');
                 });
         });
 });

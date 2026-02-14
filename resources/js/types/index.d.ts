@@ -102,4 +102,13 @@ export interface ConfigurationTypeForSelect extends Option {}
 
 export interface ServerForSelect extends Option {}
 
+export interface Tariff extends BaseInterface {
+    configurations: ConnectionConfiguration[];
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string;
+}
+
+export interface ConnectionConfigurationForSelect extends Option {}
+
 export type BreadcrumbItemType = BreadcrumbItem;

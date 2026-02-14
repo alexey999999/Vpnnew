@@ -139,4 +139,11 @@ return [
             'max_double_vpn_servers_out' => env('MAX_DOUBLE_VPN_SERVERS_OUT_CONNECTION_CONFIGURATIONS_SEEDER', 3),
         ],
     ],
+
+    'tariffs' => [
+        'seeder' => [
+            'num_rows' => env('TARIFFS_SEEDER_NUM_ROWS', 10),
+            'max_configurations' => env('MAX_CONFIGURATIONS_TARIFFS_SEEDER', 5),
+        ],
+    ],
 ];

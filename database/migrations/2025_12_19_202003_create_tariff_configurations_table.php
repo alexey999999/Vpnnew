@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tariff_configurations', function (Blueprint $table) {
-            $table->unsignedBigInteger('configuration_id');
             $table->unsignedBigInteger('tariff_id');
+            $table->unsignedBigInteger('configuration_id');
             $table->timestamps();
 
-            $table->foreign('configuration_id')->references('id')->on('connection_configurations');
             $table->foreign('tariff_id')->references('id')->on('tariffs');
+            $table->foreign('configuration_id')->references('id')->on('connection_configurations');
 
             $table->primary(['configuration_id','tariff_id']);
         });

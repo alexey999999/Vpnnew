@@ -2,12 +2,55 @@
 
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem, ConnectionConfiguration } from '@/types';
-import { index as configurationsIndex } from '@/routes/connection-configurations';
-import { index as configurationsDeletedIndex } from '@/routes/connection-configurations/deleted';
+import { BreadcrumbItem, Tariff } from '@/types';
+import { index as configurationsDeletedIndex } from '@/routes/tariffs/deleted';
 import { ref } from 'vue';
 import { ArchiveRestore, Trash2 } from 'lucide-vue-next';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { index as tariffsIndex } from '@/routes/tariffs';
+
+defineProps<{
+    tariffs: Tariff[];
+}>();
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Тарифы',
+        href: tariffsIndex().url,
+    },
+    {
+        title: 'Удалённые тарифы',
+        href: configurationsDeletedIndex().url,
+    },
+];
+
+const showRestoreConnectionConfigurationModal = ref(false);
+const showRestoreAllConnectionConfigurationsModal = ref(false);
+const showFinallyDeleteConnectionConfigurationModal = ref(false);
+const showFinallyDeleteAllConnectionConfigurationsModal = ref(false);
+
+const restoreConnectionConfigurationData = ref({
+    id: '',
+    name: '',
+});
+
+const finallyDeleteConnectionConfigurationData = ref({
+    id: '',
+    name: '',
+});
+
+const mainTableHeaders: string[] = [
+    'ID',
+    'Название',
+    'Конфигурации',
+    'Создан',
+    'Обновлён',
+    'Удалён',
+];
+
+const mainTableTdClasses: string = "border border-gray-300 p-4";
+
+const page = usePage()
 
 const restoreConnectionConfigurationModal = (connectionConfigurationId) => {
     showRestoreConnectionConfigurationModal.value = true
@@ -59,53 +102,8 @@ const finallyDeleteAllConnectionConfigurations = (isConfirmed) => {
     }
 }
 
-const showRestoreConnectionConfigurationModal = ref(false);
-const showRestoreAllConnectionConfigurationsModal = ref(false);
-const showFinallyDeleteConnectionConfigurationModal = ref(false);
-const showFinallyDeleteAllConnectionConfigurationsModal = ref(false);
-
-const restoreConnectionConfigurationData = ref({
-    id: '',
-    name: '',
-});
-
-const finallyDeleteConnectionConfigurationData = ref({
-    id: '',
-    name: '',
-});
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Конфигурации',
-        href: configurationsIndex().url,
-    },
-    {
-        title: 'Удалённые конфигурации',
-        href: configurationsDeletedIndex().url,
-    },
-];
-
-const mainTableHeaders: string[] = [
-    'ID',
-    'Название',
-    'Тип',
-    'Входящие конфигурации',
-    'Исходящие конфигурации',
-    'Создан',
-    'Обновлён',
-    'Удалён',
-];
-
-const mainTableTdClasses: string = "border border-gray-300 p-4";
-
-defineProps<{
-    connectionConfigurations: ConnectionConfiguration[];
-}>();
-
-const page = usePage()
-
 const findConnectionConfigurationById = (connectionConfigurationId) => {
-    return page.props.connectionConfigurations.find((connectionConfiguration) => connectionConfiguration.id == connectionConfigurationId)
+    return page.props.connectionConfigurations.find((connectionConfiguration) => tariff.id == connectionConfigurationId)
 }
 </script>
 
@@ -134,13 +132,13 @@ const findConnectionConfigurationById = (connectionConfigurationId) => {
                                @result="finallyDeleteAllConnectionConfigurations"
             ></ConfirmationModal>
             <div>
-                <button v-if="connectionConfigurations.length > 0"
+                <button v-if="tariffs.length > 0"
                         @click="restoreAllServersModal"
                         class="inline-block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer"
                 >
                     Восстановить все конфигурации
                 </button>
-                <button v-if="connectionConfigurations.length > 0"
+                <button v-if="tariffs.length > 0"
                         @click="finallyDeleteAllServersModal"
                         class="inline-block rounded-md bg-red-500/80 ml-3 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer"
                 >
@@ -156,34 +154,28 @@ const findConnectionConfigurationById = (connectionConfigurationId) => {
                             >
                                 {{ mainTableHeader }}
                             </th>
-                            <th class="border border-gray-300 p-4"></th>
+                            <th ref="serverActions" class="border border-gray-300 p-4"></th>
                         </tr>
                     </thead>
     
                     <tbody>
-                        <tr v-for="connectionConfiguration in connectionConfigurations" :key="connectionConfiguration.id"
+                        <tr v-for="tariff in tariffs" :key="tariff.id"
                             class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900/50 dark:even:bg-gray-950 hover:bg-gray-200 dark:hover:bg-gray-800"
                         >
-                            <td :class="mainTableTdClasses">{{ connectionConfiguration.id }}</td>
-                            <td :class="mainTableTdClasses">{{ connectionConfiguration.name }}</td>
-                            <td :class="mainTableTdClasses">{{ connectionConfiguration.configuration_type.name }}</td>
+                            <td :class="mainTableTdClasses">{{ tariff.id }}</td>
+                            <td :class="mainTableTdClasses">{{ tariff.name }}</td>
                             <td :class="mainTableTdClasses">
-                                <template v-for="(serverIn, index) in connectionConfiguration.servers_in">
-                                    {{ serverIn.name }}<template v-if="index !== connectionConfiguration.servers_in.length - 1">, </template>
+                                <template v-for="(configuration, index) in tariff.configurations">
+                                    {{ configuration.name }}<template v-if="index !== tariff.configurations.length - 1">, </template>
                                 </template>
                             </td>
-                            <td :class="mainTableTdClasses">
-                                <template v-for="(serverOut, index) in connectionConfiguration.servers_out">
-                                    {{ serverOut.name }}<template v-if="index !== connectionConfiguration.servers_out.length - 1">, </template>
-                                </template>
-                            </td>
-                            <td :class="mainTableTdClasses">{{ connectionConfiguration.created_at }}</td>
-                            <td :class="mainTableTdClasses">{{ connectionConfiguration.updated_at }}</td>
-                            <td :class="mainTableTdClasses">{{ connectionConfiguration.deleted_at }}</td>
+                            <td :class="mainTableTdClasses">{{ tariff.created_at }}</td>
+                            <td :class="mainTableTdClasses">{{ tariff.updated_at }}</td>
+                            <td :class="mainTableTdClasses">{{ tariff.deleted_at }}</td>
                             <td :class="mainTableTdClasses">
                                 <div :class="''">
-                                    <component :class="'cursor-pointer mb-3'" :is="ArchiveRestore" @click="restoreConnectionConfigurationModal(connectionConfiguration.id)" />
-                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="finallyDeleteConnectionConfigurationModal(connectionConfiguration.id)" />
+                                    <component :class="'cursor-pointer mb-3'" :is="ArchiveRestore" @click="restoreConnectionConfigurationModal(tariff.id)" />
+                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="finallyDeleteConnectionConfigurationModal(tariff.id)" />
                                 </div>
                             </td>
                         </tr>

@@ -89,7 +89,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const serversTableHeaders: string[] = [
+const mainTableHeaders: string[] = [
     'ID',
     'Название',
     'Тип',
@@ -167,10 +167,10 @@ const findServerById = (serverId) => {
                 <table class="border-collapse border border-gray-400">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th v-for="(serversTableHeader, index) in serversTableHeaders"
+                            <th v-for="(mainTableHeader, index) in mainTableHeaders"
                                 :key="index" class="border border-gray-300 p-4"
                             >
-                                {{ serversTableHeader }}
+                                {{ mainTableHeader }}
                             </th>
                             <th ref="serverActions" class="border border-gray-300 p-4"></th>
                         </tr>
