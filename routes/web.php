@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConnectionConfigurationsController;
 use App\Http\Controllers\ServersController;
 use App\Http\Controllers\TariffsController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -74,6 +75,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     Route::delete('/', [TariffsController::class, 'finallyDelete'])->name('finally-delete');
                     Route::delete('all', [TariffsController::class, 'finallyDeleteAll'])->name('finally-delete-all');
                 });
+        });
+
+    Route::prefix('users')
+        ->name('users.')
+        ->group(function () {
+            Route::get('/', [UsersController::class, 'index'])->name('index');
         });
 });
 

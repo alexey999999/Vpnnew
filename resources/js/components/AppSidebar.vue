@@ -15,9 +15,10 @@ import { dashboard } from '@/routes';
 import { index as serversIndex } from '@/routes/servers';
 import { index as configurationsIndex } from '@/routes/connection-configurations';
 import { index as tariffsIndex } from '@/routes/tariffs';
+import { index as usersIndex } from '@/routes/users';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { /*BookOpen, Folder, */LayoutGrid, Server, ListCollapse, ListChecks } from 'lucide-vue-next';
+import { /*BookOpen, Folder, */LayoutGrid, Server, ListCollapse, ListChecks, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -40,6 +41,11 @@ const mainNavItems: NavItem[] = [
         title: 'Тарифы',
         href: tariffsIndex(),
         icon: ListChecks,
+    },
+    {
+        title: 'Пользователи',
+        href: usersIndex(),
+        icon: Users,
     },
 ];
 

@@ -14,10 +14,20 @@ class Tariff extends Model
 
     const RELATION_CONFIGURATIONS = 'configurations';
 
+    const RELATION_USERS = 'users';
+
     protected $fillable = ['name'];
 
     public function configurations(): BelongsToMany
     {
         return $this->belongsToMany(ConnectionConfiguration::class, 'tariff_configurations', 'tariff_id', 'configuration_id')->withTimestamps();
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'tariff_users', 'tariff_id', 'user_id')
+            ->using(TariffUser::class)
+            ->withPivot(['active_to'])
+            ->withTimestamps();
     }
 }

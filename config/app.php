@@ -146,4 +146,11 @@ return [
             'max_configurations' => env('MAX_CONFIGURATIONS_TARIFFS_SEEDER', 5),
         ],
     ],
+
+    'users' => [
+        'seeder' => [
+            'num_rows' => env('USERS_SEEDER_NUM_ROWS', 10),
+            'max_tariffs' => env('MAX_TARIFFS_USERS_SEEDER', 5),
+        ],
+    ],
 ];
