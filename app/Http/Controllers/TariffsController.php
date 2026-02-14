@@ -94,8 +94,7 @@ class TariffsController extends Controller
         /** @var Tariff $tariff */
         $tariff = Tariff::onlyTrashed()->find($request->get('id'));
 
-        $tariff->serversIn()->detach();
-        $tariff->serversOut()->detach();
+        $tariff->configurations()->detach();
 
         $tariff->forceDelete();
 
@@ -108,8 +107,7 @@ class TariffsController extends Controller
         $tariffs = Tariff::onlyTrashed();
 
         $tariffs->each(function ($tariff) {
-            $tariff->serversIn()->detach();
-            $tariff->serversOut()->detach();
+            $tariff->configurations()->detach();
         });
 
         $tariffs->forceDelete();

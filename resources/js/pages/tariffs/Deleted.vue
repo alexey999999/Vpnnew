@@ -24,20 +24,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const showRestoreConnectionConfigurationModal = ref(false);
-const showRestoreAllConnectionConfigurationsModal = ref(false);
-const showFinallyDeleteConnectionConfigurationModal = ref(false);
-const showFinallyDeleteAllConnectionConfigurationsModal = ref(false);
+const showRestoreTariffModal = ref(false);
+const showRestoreAllTariffsModal = ref(false);
+const showFinallyDeleteTariffModal = ref(false);
+const showFinallyDeleteAllTariffsModal = ref(false);
 
-const restoreConnectionConfigurationData = ref({
-    id: '',
-    name: '',
-});
-
-const finallyDeleteConnectionConfigurationData = ref({
-    id: '',
-    name: '',
-});
+const restoreTariffData = ref({});
+const finallyDeleteTariffData = ref({});
 
 const mainTableHeaders: string[] = [
     'ID',
@@ -52,97 +45,97 @@ const mainTableTdClasses: string = "border border-gray-300 p-4";
 
 const page = usePage()
 
-const restoreConnectionConfigurationModal = (connectionConfigurationId) => {
-    showRestoreConnectionConfigurationModal.value = true
-    restoreConnectionConfigurationData.value = findConnectionConfigurationById(connectionConfigurationId)
+const restoreTariffModal = (tariffId) => {
+    showRestoreTariffModal.value = true
+    restoreTariffData.value = findTariffById(tariffId)
 }
 
-const restoreConnectionConfiguration = (isConfirmed) => {
-    showRestoreConnectionConfigurationModal.value = false
+const restoreTariff = (isConfirmed) => {
+    showRestoreTariffModal.value = false
     
     if (isConfirmed) {
-        useForm({id: restoreConnectionConfigurationData.value.id}).put(page.props.restoreConnectionConfigurationUrl);
+        useForm({id: restoreTariffData.value.id}).put(page.props.restoreTariffUrl);
     }
 }
 
 const restoreAllServersModal = () => {
-    showRestoreAllConnectionConfigurationsModal.value = true
+    showRestoreAllTariffsModal.value = true
 }
 
-const restoreAllConnectionConfigurations = (isConfirmed) => {
-    showRestoreAllConnectionConfigurationsModal.value = false
+const restoreAllTariffs = (isConfirmed) => {
+    showRestoreAllTariffsModal.value = false
     
     if (isConfirmed) {
-        useForm().put(page.props.restoreAllConnectionConfigurationsUrl);
+        useForm().put(page.props.restoreAllTariffsUrl);
     }
 }
 
-const finallyDeleteConnectionConfigurationModal = (connectionConfigurationId) => {
-    showFinallyDeleteConnectionConfigurationModal.value = true
-    finallyDeleteConnectionConfigurationData.value = findConnectionConfigurationById(connectionConfigurationId)
+const finallyDeleteTariffModal = (tariffId) => {
+    showFinallyDeleteTariffModal.value = true
+    finallyDeleteTariffData.value = findTariffById(tariffId)
 }
 
-const finallyDeleteConnectionConfiguration = (isConfirmed) => {
-    showFinallyDeleteConnectionConfigurationModal.value = false
+const finallyDeleteTariff = (isConfirmed) => {
+    showFinallyDeleteTariffModal.value = false
 
     if (isConfirmed) {
-        useForm({id: finallyDeleteConnectionConfigurationData.value.id}).delete(page.props.finallyDeleteConnectionConfigurationUrl);
+        useForm({id: finallyDeleteTariffData.value.id}).delete(page.props.finallyDeleteTariffUrl);
     }
 }
 
 const finallyDeleteAllServersModal = () => {
-    showFinallyDeleteAllConnectionConfigurationsModal.value = true
+    showFinallyDeleteAllTariffsModal.value = true
 }
 
-const finallyDeleteAllConnectionConfigurations = (isConfirmed) => {
-    showFinallyDeleteAllConnectionConfigurationsModal.value = false
+const finallyDeleteAllTariffs = (isConfirmed) => {
+    showFinallyDeleteAllTariffsModal.value = false
     
     if (isConfirmed) {
-        useForm().delete(page.props.finallyDeleteAllConnectionConfigurationsUrl);
+        useForm().delete(page.props.finallyDeleteAllTariffsUrl);
     }
 }
 
-const findConnectionConfigurationById = (connectionConfigurationId) => {
-    return page.props.connectionConfigurations.find((connectionConfiguration) => tariff.id == connectionConfigurationId)
+const findTariffById = (tariffId) => {
+    return page.props.tariffs.find((tariff) => tariff.id == tariffId)
 }
 </script>
 
 <template>
-    <Head title="Удалённые конфигурации" />
+    <Head title="Удалённые тарифы" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <ConfirmationModal :show="showRestoreConnectionConfigurationModal"
-                               :title="'Вы действительно хотите восстановить конфигурацию ' + restoreConnectionConfigurationData.name + '?'"
-                               :message="'Конфигурация будет перемещена в список конфигураций'"
-                               @result="restoreConnectionConfiguration"
+            <ConfirmationModal :show="showRestoreTariffModal"
+                               :title="'Вы действительно хотите восстановить тариф ' + restoreTariffData.name + '?'"
+                               :message="'Тариф будет перемещена в список конфигураций'"
+                               @result="restoreTariff"
             ></ConfirmationModal>
-            <ConfirmationModal :show="showRestoreAllConnectionConfigurationsModal"
-                               :title="'Вы действительно хотите восстановить ВСЕ конфигурации?'"
-                               :message="'ВНИМАНИЕ! ВСЕ!!! Конфигурации будут восстановлены!'"
-                               @result="restoreAllConnectionConfigurations"
+            <ConfirmationModal :show="showRestoreAllTariffsModal"
+                               :title="'Вы действительно хотите восстановить ВСЕ тарифы?'"
+                               :message="'ВНИМАНИЕ! ВСЕ!!! Тарифы будут восстановлены!'"
+                               @result="restoreAllTariffs"
             ></ConfirmationModal>
-            <ConfirmationModal :show="showFinallyDeleteConnectionConfigurationModal"
-                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить конфигурацию ' + finallyDeleteConnectionConfigurationData.name + '?'"
-                               :message="'ВНИМАНИЕ! конфигурацию будет БЕЗВОЗВРАТНО удалён!'"
-                               @result="finallyDeleteConnectionConfiguration"
+            <ConfirmationModal :show="showFinallyDeleteTariffModal"
+                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить тариф ' + finallyDeleteTariffData.name + '?'"
+                               :message="'ВНИМАНИЕ! Тариф будет БЕЗВОЗВРАТНО удалён!'"
+                               @result="finallyDeleteTariff"
             ></ConfirmationModal>
-            <ConfirmationModal :show="showFinallyDeleteAllConnectionConfigurationsModal"
-                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить ВСЕ конфигурации?'"
-                               :message="'ВНИМАНИЕ! ВСЕ!!! Конфигурации будут БЕЗВОЗВРАТНО удалены!'"
-                               @result="finallyDeleteAllConnectionConfigurations"
+            <ConfirmationModal :show="showFinallyDeleteAllTariffsModal"
+                               :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить ВСЕ тарифы?'"
+                               :message="'ВНИМАНИЕ! ВСЕ!!! Тарифы будут БЕЗВОЗВРАТНО удалены!'"
+                               @result="finallyDeleteAllTariffs"
             ></ConfirmationModal>
             <div>
                 <button v-if="tariffs.length > 0"
                         @click="restoreAllServersModal"
                         class="inline-block rounded-md bg-blue-500/80 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none cursor-pointer"
                 >
-                    Восстановить все конфигурации
+                    Восстановить все тарифы
                 </button>
                 <button v-if="tariffs.length > 0"
                         @click="finallyDeleteAllServersModal"
                         class="inline-block rounded-md bg-red-500/80 ml-3 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 focus:outline-none cursor-pointer"
                 >
-                    БЕЗВОЗВРАТНО удалить все конфигурации
+                    БЕЗВОЗВРАТНО удалить все тарифы
                 </button>
             </div>
             <div class="overflow-x-auto">
@@ -174,8 +167,8 @@ const findConnectionConfigurationById = (connectionConfigurationId) => {
                             <td :class="mainTableTdClasses">{{ tariff.deleted_at }}</td>
                             <td :class="mainTableTdClasses">
                                 <div :class="''">
-                                    <component :class="'cursor-pointer mb-3'" :is="ArchiveRestore" @click="restoreConnectionConfigurationModal(tariff.id)" />
-                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="finallyDeleteConnectionConfigurationModal(tariff.id)" />
+                                    <component :class="'cursor-pointer mb-3'" :is="ArchiveRestore" @click="restoreTariffModal(tariff.id)" />
+                                    <component :class="'text-pink-600 cursor-pointer'" :is="Trash2" @click="finallyDeleteTariffModal(tariff.id)" />
                                 </div>
                             </td>
                         </tr>

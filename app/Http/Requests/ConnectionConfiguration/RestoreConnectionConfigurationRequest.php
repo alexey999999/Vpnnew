@@ -14,7 +14,7 @@ class RestoreConnectionConfigurationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'int', 'exists:servers,id'],
+            'id' => ['required', 'int', 'exists:connection_configurations,id'],
         ];
     }
 }

@@ -125,7 +125,7 @@ const findConnectionConfigurationById = (connectionConfigurationId) => {
             ></ConfirmationModal>
             <ConfirmationModal :show="showFinallyDeleteConnectionConfigurationModal"
                                :title="'Вы действительно хотите БЕЗВОЗВРАТНО удалить конфигурацию ' + finallyDeleteConnectionConfigurationData.name + '?'"
-                               :message="'ВНИМАНИЕ! конфигурацию будет БЕЗВОЗВРАТНО удалён!'"
+                               :message="'ВНИМАНИЕ! Конфигурация будет БЕЗВОЗВРАТНО удалена!'"
                                @result="finallyDeleteConnectionConfiguration"
             ></ConfirmationModal>
             <ConfirmationModal :show="showFinallyDeleteAllConnectionConfigurationsModal"
